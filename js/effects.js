@@ -331,17 +331,18 @@
     const textureLoader = new T.TextureLoader();
     const photos = Birthday.galleryPhotos || [];
 
-    // Create 3D floating gallery in a gentle celestial arc
+    // Create 3D floating gallery in a linear horizontal ribbon drifting Left to Right (NOT round)
     const total = photos.length || 7;
+    const spacing = 3.6;
+    const totalSpan = total * spacing;
+    const halfSpan = totalSpan / 2;
+
     photos.forEach((photo, idx) => {
-      const angle = ((idx - total / 2) / total) * Math.PI * 0.9;
-      const radius = 6.2;
-      const x = Math.sin(angle) * radius;
-      const z = -Math.cos(angle) * radius + 5.5;
+      const initialX = (idx - total / 2) * spacing;
 
       const frameGroup = new T.Group();
-      frameGroup.position.set(x, 0, z);
-      frameGroup.rotation.y = -angle;
+      frameGroup.position.set(initialX, 0, 0);
+      frameGroup.rotation.y = 0; // Flat facing the viewer, linear Left to Right (NOT round)
 
       // Beveled Gold Frame Border
       const frameGeo = new T.BoxGeometry(2.3, 3.0, 0.08);
@@ -426,11 +427,11 @@
       const hint = document.querySelector('.museum-hint');
       const toggleBtn = document.querySelector('#btn-toggle-3d-float');
       if (isMuseumFloating) {
-        if (hint) hint.innerHTML = '✦ FLOATING 3D ORBIT &nbsp;·&nbsp; (Click Frame to Freeze Static)';
+        if (hint) hint.innerHTML = '✦ FLOATING LEFT TO RIGHT &nbsp;·&nbsp; (Click Frame to Freeze Static)';
         if (toggleBtn) toggleBtn.innerHTML = '⏸ Freeze Static View';
       } else {
-        if (hint) hint.innerHTML = '📌 STATIC VIEW LOCKED &nbsp;·&nbsp; (Tap to Resume Floating Orbit)';
-        if (toggleBtn) toggleBtn.innerHTML = '▶ Resume Floating 3D Orbit';
+        if (hint) hint.innerHTML = '📌 STATIC VIEW LOCKED &nbsp;·&nbsp; (Tap to Resume Left-to-Right Float)';
+        if (toggleBtn) toggleBtn.innerHTML = '▶ Resume Left-to-Right Float';
       }
     }
 
@@ -438,9 +439,15 @@
       requestAnimationFrame(renderMuseum);
       const time = performance.now() * 0.001;
       if (isMuseumFloating) {
-        museumScene.rotation.y += 0.0022; // Smooth automatic floating orbit!
-        museumFrames.forEach((f, i) => {
-          f.group.position.y = Math.sin(time + i) * 0.08;
+        // Continuous smooth Left-to-Right drift along X-axis!
+        museumFrames.forEach((f) => {
+          f.group.position.x += 0.015; // Smooth Left-to-Right drift!
+          if (f.group.position.x > halfSpan) {
+            f.group.position.x -= totalSpan; // Seamless wrap-around!
+          }
+          // Gentle floating vertical wave
+          f.group.position.y = Math.sin(time * 1.2 + f.index * 0.9) * 0.12;
+          f.group.rotation.z = Math.sin(time * 0.8 + f.index) * 0.02;
         });
       } else {
         museumFrames.forEach((f) => {
@@ -488,17 +495,28 @@
     // On clicking a frame, it becomes STATIC!
     isMuseumFloating = false;
     updateMuseumFloatingUI();
-    Birthday.toast?.("Photograph focused & locked static. Tap hint to resume orbit! 📌");
+    Birthday.toast?.("Photograph focused & locked static. Tap hint to resume left-to-right float! 📌");
 
-    // Smooth camera glide to frame
+    // Center the selected frame smoothly along X-axis
+    const total = Birthday.galleryPhotos?.length || 7;
+    const spacing = 3.6;
+    const totalSpan = total * spacing;
+    const halfSpan = totalSpan / 2;
+
     if (window.gsap) {
-      gsap.to(museumScene.rotation, {
-        y: -target.angle,
-        duration: 1.2,
-        ease: 'power3.out'
+      const shiftX = target.group.position.x;
+      museumFrames.forEach((f) => {
+        let newX = f.group.position.x - shiftX;
+        while (newX > halfSpan) newX -= totalSpan;
+        while (newX < -halfSpan) newX += totalSpan;
+        gsap.to(f.group.position, {
+          x: newX,
+          y: (f === target ? 0 : f.group.position.y),
+          z: (f === target ? 1.0 : 0),
+          duration: 1.0,
+          ease: 'power3.out'
+        });
       });
-    } else {
-      museumScene.rotation.y = -target.angle;
     }
 
     // Update active card UI

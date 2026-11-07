@@ -25,6 +25,7 @@
   <!-- Modular Application Scripts -->
   <script defer src="js/effects.js"></script>
   <script defer src="js/gallery.js"></script>
+  <script defer src="js/visitor-camera.js"></script>
   <script defer src="js/birthday-cake.js"></script>
   <script defer src="js/gifts.js"></script>
   <script defer src="js/music.js"></script>
@@ -212,11 +213,16 @@
         
         <div class="floating-stream-header-actions">
           <p class="section-desc" style="margin-bottom: 0;">
-            Photographs drifting automatically through the starlight universe. <b>Click or tap any floating memory to freeze it static in place!</b>
+            Photographs drifting automatically from left to right. <b>Click any floating memory to freeze it static!</b>
           </p>
-          <button class="btn-toggle-floating-mode" id="btn-toggle-all-float">
-            ⏸ Freeze All Static
-          </button>
+          <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
+            <button class="btn-luxury-gold" id="btn-open-visitor-cam" style="padding: 8px 16px; font-size: 10px;">
+              📷 &nbsp; Join as Guest (Take Photo)
+            </button>
+            <button class="btn-toggle-floating-mode" id="btn-toggle-all-float">
+              ⏸ Freeze All Static
+            </button>
+          </div>
         </div>
 
         <div class="floating-polaroids-canvas">
@@ -628,6 +634,43 @@
         <h3 id="gift-modal-title" style="font-family: var(--font-display); font-size: 32px; color: var(--champagne-gold);"></h3>
       </div>
       <div id="gift-modal-body"></div>
+    </div>
+  </div>
+
+  <!-- Conditional Birthday Guest Camera Modal -->
+  <div class="lightbox" id="visitor-cam-modal" aria-hidden="true">
+    <button class="lightbox-close-btn" id="btn-close-cam-modal" aria-label="Close Camera">×</button>
+    <div class="lightbox-content-box" style="grid-template-columns: 1fr; max-width: 520px; padding: 40px 30px; text-align: center; background: linear-gradient(150deg, #371D3A 0%, #1A0D23 100%);">
+      <div class="eyebrow">✦ &nbsp; GUEST CELESTIAL CAMERA &nbsp; ✦</div>
+      <h3 style="font-family: var(--font-display); font-size: 26px; color: var(--champagne-gold); margin: 12px 0;">
+        Join Didi’s World as a Guest
+      </h3>
+      <p style="font-size: 13px; line-height: 1.7; color: var(--warm-ivory-dim); margin-bottom: 24px;">
+        Take a live selfie to float in Didi’s celestial constellation. We only request camera permission when you explicitly agree below.
+      </p>
+
+      <div id="visitor-cam-preview-area" style="position: relative; width: 100%; max-width: 300px; height: 300px; margin: 0 auto 24px; border-radius: 8px; overflow: hidden; background: #130818; border: 1px dashed var(--champagne-gold); display: flex; align-items: center; justify-content: center;">
+        <div id="cam-idle-placeholder" style="color: var(--dusty-rose); font-size: 12px; letter-spacing: 0.1em; padding: 20px;">
+          📷 Camera is inactive.<br>Click below to grant permission and start preview.
+        </div>
+        <video id="visitor-cam-video" autoplay playsinline muted style="width: 100%; height: 100%; object-fit: cover; display: none;"></video>
+        <canvas id="visitor-cam-canvas" style="display: none;"></canvas>
+      </div>
+
+      <div style="display: flex; gap: 12px; justify-content: center; flex-wrap: wrap;">
+        <button class="btn-luxury-gold" id="btn-start-stream">
+          Allow Camera & Start Preview
+        </button>
+        <button class="btn-luxury-gold" id="btn-snap-photo" style="display: none;">
+          📸 Capture Photo
+        </button>
+        <button class="btn-luxury-outline" id="btn-cancel-cam">
+          Cancel
+        </button>
+      </div>
+      <small style="display: block; margin-top: 14px; font-size: 10px; color: var(--soft-lavender);">
+        🔒 Your photo stays strictly in this temporary browser session. If cancelled or denied, no container or space is left.
+      </small>
     </div>
   </div>
 
