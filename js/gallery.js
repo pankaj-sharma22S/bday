@@ -289,27 +289,83 @@ And let our lifelong bond unfold.`,
       });
     });
 
-    // 2. Render Floating Polaroids Stream
+    // 2. Render Automatic Floating Polaroids Constellation
     if (polaroidsTrack) {
       polaroidsTrack.innerHTML = Birthday.galleryPhotos.map((photo, i) => {
-        const floatClass = (i % 3 === 0) ? 'float-pol-1' : (i % 3 === 1) ? 'float-pol-2' : 'float-pol-3';
+        const driftClass = 'float-drift-' + ((i % 7) + 1);
         return `
-          <div class="floating-polaroid-card ${floatClass}" data-open="${photo.id}">
+          <div class="floating-polaroid-card ${driftClass}" data-id="${photo.id}">
             <div class="washi-tape"></div>
             <div class="polaroid-img-wrap">
               <img src="${photo.url}" alt="${photo.title}" loading="lazy">
             </div>
             <div class="polaroid-caption">${photo.title}</div>
+            <div class="polaroid-status-pill">✦ Floating (Tap to Freeze)</div>
+            <div class="polaroid-static-actions">
+              <button class="btn-polaroid-act btn-resume-float" data-resume="${photo.id}">▶ Resume Float</button>
+              <button class="btn-polaroid-act btn-open-modal" data-open="${photo.id}">🔍 Enlarge</button>
+            </div>
           </div>
         `;
       }).join('');
 
-      polaroidsTrack.querySelectorAll('[data-open]').forEach(card => {
-        card.addEventListener('click', () => {
-          Birthday.effects?.launchConfetti(25);
-          openLightboxById(card.dataset.open);
+      polaroidsTrack.querySelectorAll('.floating-polaroid-card').forEach(card => {
+        card.addEventListener('click', (e) => {
+          // If clicked on "Enlarge" button
+          if (e.target.closest('.btn-open-modal')) {
+            openLightboxById(card.dataset.id);
+            return;
+          }
+
+          // If clicked on "Resume Float" button
+          if (e.target.closest('.btn-resume-float')) {
+            card.classList.remove('is-static');
+            const pill = card.querySelector('.polaroid-status-pill');
+            if (pill) pill.textContent = '✦ Floating (Tap to Freeze)';
+            Birthday.toast?.("Photograph floating resumed! ✨");
+            return;
+          }
+
+          // Toggle Static / Floating state
+          const isNowStatic = card.classList.toggle('is-static');
+          const pill = card.querySelector('.polaroid-status-pill');
+
+          if (isNowStatic) {
+            if (pill) pill.textContent = '📌 STATIC / FROZEN (Tap to Resume)';
+            Birthday.soundFx?.playGiftChime();
+            Birthday.effects?.launchConfetti(20);
+            Birthday.toast?.("Memory frozen in place. Tap again to resume floating! 📌");
+          } else {
+            if (pill) pill.textContent = '✦ Floating (Tap to Freeze)';
+            Birthday.toast?.("Photograph floating resumed! ✨");
+          }
         });
       });
+
+      // Global Toggle All Floating / Static Button
+      const toggleAllBtn = document.querySelector('#btn-toggle-all-float');
+      if (toggleAllBtn) {
+        toggleAllBtn.onclick = () => {
+          const cards = polaroidsTrack.querySelectorAll('.floating-polaroid-card');
+          const anyStatic = Array.from(cards).some(c => c.classList.contains('is-static'));
+
+          cards.forEach(card => {
+            const pill = card.querySelector('.polaroid-status-pill');
+            if (anyStatic) {
+              // Resume all to floating
+              card.classList.remove('is-static');
+              if (pill) pill.textContent = '✦ Floating (Tap to Freeze)';
+            } else {
+              // Freeze all static
+              card.classList.add('is-static');
+              if (pill) pill.textContent = '📌 STATIC / FROZEN (Tap to Resume)';
+            }
+          });
+
+          toggleAllBtn.textContent = anyStatic ? '⏸ Freeze All Static' : '✦ Float All Photos';
+          Birthday.toast?.(anyStatic ? "All memories are floating! ✨" : "All memories frozen static! 📌");
+        };
+      }
     }
   }
 

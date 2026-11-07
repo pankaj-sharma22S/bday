@@ -184,10 +184,15 @@
 
         <div class="museum-ui-overlay">
           <div class="museum-controls-bar">
-            <span class="museum-hint">✦ DRAG TO ROTATE 3D SPACE ✦</span>
-            <div class="museum-nav-buttons">
-              <button class="museum-nav-btn" id="museum-btn-prev" aria-label="Previous Memory">‹</button>
-              <button class="museum-nav-btn" id="museum-btn-next" aria-label="Next Memory">›</button>
+            <span class="museum-hint" style="cursor: pointer;">✦ FLOATING 3D ORBIT &nbsp;·&nbsp; (Click Frame to Freeze Static)</span>
+            <div style="display: flex; align-items: center; gap: 10px;">
+              <button class="btn-toggle-floating-mode" id="btn-toggle-3d-float" style="padding: 6px 14px; font-size: 10px;">
+                ⏸ Freeze Static View
+              </button>
+              <div class="museum-nav-buttons">
+                <button class="museum-nav-btn" id="museum-btn-prev" aria-label="Previous Memory">‹</button>
+                <button class="museum-nav-btn" id="museum-btn-next" aria-label="Next Memory">›</button>
+              </div>
             </div>
           </div>
 
@@ -204,12 +209,18 @@
       <div class="floating-stream-container">
         <div class="eyebrow">✦ &nbsp; WEIGHTLESS MEMORIES &nbsp; ✦</div>
         <h2 class="section-title">Memories Floating In <em>Starlight</em></h2>
-        <p class="section-desc" style="margin-bottom: 30px;">
-          Drifting like golden polaroids through space. Swipe horizontally or tap any floating memory to pull it into view!
-        </p>
+        
+        <div class="floating-stream-header-actions">
+          <p class="section-desc" style="margin-bottom: 0;">
+            Photographs drifting automatically through the starlight universe. <b>Click or tap any floating memory to freeze it static in place!</b>
+          </p>
+          <button class="btn-toggle-floating-mode" id="btn-toggle-all-float">
+            ⏸ Freeze All Static
+          </button>
+        </div>
 
         <div class="floating-polaroids-canvas">
-          <div class="floating-polaroids-track" id="floating-polaroids-track">
+          <div class="floating-constellation-grid" id="floating-polaroids-track">
             <!-- Populated dynamically by js/gallery.js -->
           </div>
         </div>

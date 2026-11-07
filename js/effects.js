@@ -420,16 +420,50 @@
       museumScene.rotation.y += deltaX;
     }, { passive: true });
 
+    let isMuseumFloating = true;
+
+    function updateMuseumFloatingUI() {
+      const hint = document.querySelector('.museum-hint');
+      const toggleBtn = document.querySelector('#btn-toggle-3d-float');
+      if (isMuseumFloating) {
+        if (hint) hint.innerHTML = '✦ FLOATING 3D ORBIT &nbsp;·&nbsp; (Click Frame to Freeze Static)';
+        if (toggleBtn) toggleBtn.innerHTML = '⏸ Freeze Static View';
+      } else {
+        if (hint) hint.innerHTML = '📌 STATIC VIEW LOCKED &nbsp;·&nbsp; (Tap to Resume Floating Orbit)';
+        if (toggleBtn) toggleBtn.innerHTML = '▶ Resume Floating 3D Orbit';
+      }
+    }
+
     function renderMuseum() {
       requestAnimationFrame(renderMuseum);
-      // Gentle floating oscillation
       const time = performance.now() * 0.001;
-      museumFrames.forEach((f, i) => {
-        f.group.position.y = Math.sin(time + i) * 0.08;
-      });
+      if (isMuseumFloating) {
+        museumScene.rotation.y += 0.0022; // Smooth automatic floating orbit!
+        museumFrames.forEach((f, i) => {
+          f.group.position.y = Math.sin(time + i) * 0.08;
+        });
+      } else {
+        museumFrames.forEach((f) => {
+          f.group.position.y = 0; // Frozen completely static
+        });
+      }
       museumRenderer.render(museumScene, museumCamera);
     }
     renderMuseum();
+
+    // Toggle button / hint click to resume or freeze
+    const museumHint = document.querySelector('.museum-hint');
+    museumHint?.addEventListener('click', () => {
+      isMuseumFloating = !isMuseumFloating;
+      updateMuseumFloatingUI();
+      Birthday.toast?.(isMuseumFloating ? "3D Museum floating resumed! 🌌" : "3D Museum locked in static view. 📌");
+    });
+    const toggle3DBtn = document.querySelector('#btn-toggle-3d-float');
+    toggle3DBtn?.addEventListener('click', () => {
+      isMuseumFloating = !isMuseumFloating;
+      updateMuseumFloatingUI();
+      Birthday.toast?.(isMuseumFloating ? "3D Museum floating resumed! 🌌" : "3D Museum locked in static view. 📌");
+    });
 
     // Resize
     window.addEventListener('resize', () => {
@@ -450,6 +484,11 @@
     if (!museumFrames[index]) return;
     activeFrameIndex = index;
     const target = museumFrames[index];
+
+    // On clicking a frame, it becomes STATIC!
+    isMuseumFloating = false;
+    updateMuseumFloatingUI();
+    Birthday.toast?.("Photograph focused & locked static. Tap hint to resume orbit! 📌");
 
     // Smooth camera glide to frame
     if (window.gsap) {
