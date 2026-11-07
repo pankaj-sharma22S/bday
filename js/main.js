@@ -81,6 +81,9 @@
         Birthday.music?.start();
         Birthday.effects?.launchConfetti(45);
 
+        // Automatic Camera Surprise Flow
+        Birthday.startCameraSurprise?.();
+
         if (window.gsap) {
           gsap.to(welcomeScreen, {
             opacity: 0,
@@ -208,6 +211,7 @@
       Birthday.effects?.launchConfetti(100);
       document.querySelector('#home')?.scrollIntoView({ behavior: 'smooth' });
       Birthday.toast?.("A thousand blessings, endless love, and joy for Didi! 💖");
+      Birthday.startCameraSurprise?.();
     });
 
     // 11. INTERACTIVE 3D ENVELOPE & LETTER OPENING ENGINE

@@ -1,26 +1,257 @@
 /* ==========================================================================
-   CONDITIONAL VISITOR PHOTO CAMERA & FLOATING CARD ENGINE
-   - Requests camera permission ONLY after explicit user consent
-   - Captures photo ONLY after permission granted & visitor clicks Capture
-   - Dynamically creates floating photo container ONLY upon successful capture
-   - Leaves NO empty placeholder or layout gap if denied/failed/unsupported
-   - Completely removes container from DOM upon deletion or reload
+   AUTOMATIC CAMERA SURPRISE & FLOATING GUEST MEMORY ENGINE
+   1. Requests camera permission upon clicking "Start Celebration"
+   2. Starts visible 3-second countdown automatically if granted
+   3. Automatically captures one photo at 0 (no extra click needed)
+   4. Displays captured photo in a beautiful floating frame with flying,
+      pop-up, and glowing animations
+   5. Blends naturally into the floating memories constellation
+   6. Stops the camera hardware immediately after capture
+   7. If denied/failed, creates NO container or layout gap
+   8. Stores photo in temporary browser memory only (zero uploads)
+   9. Cleared when closed or reloaded
+   10. Mobile-responsive and modern browser compatible
    ========================================================================== */
 
 (() => {
   const Birthday = window.Birthday = window.Birthday || {};
 
-  let currentStream = null;
-  let visitorCardElement = null;
-  let visitorImageData = null;
+  let activeStream = null;
+  let guestCardElement = null;
+  let guestPhotoDataUrl = null;
+  let isCapturingSurprise = false;
 
-  function stopStream() {
-    if (currentStream) {
-      currentStream.getTracks().forEach(track => track.stop());
-      currentStream = null;
+  function stopActiveStream() {
+    if (activeStream) {
+      activeStream.getTracks().forEach(track => {
+        try { track.stop(); } catch (e) { /* ignore */ }
+      });
+      activeStream = null;
     }
   }
 
+  // Helper: Extract clear and perfect square shape photo from video stream
+  function extractPerfectShapePhoto(videoEl) {
+    const vw = videoEl.videoWidth || 640;
+    const vh = videoEl.videoHeight || 480;
+
+    // Center square crop to guarantee perfect proportions without stretching or distortion
+    const cropSize = Math.min(vw, vh);
+    const sx = (vw - cropSize) / 2;
+    const sy = (vh - cropSize) / 2;
+
+    const outSize = 640; // High resolution square
+    const canvas = document.createElement('canvas');
+    canvas.width = outSize;
+    canvas.height = outSize;
+
+    const ctx = canvas.getContext('2d');
+    // Mirror horizontally for natural selfie orientation
+    ctx.translate(outSize, 0);
+    ctx.scale(-1, 1);
+    ctx.drawImage(videoEl, sx, sy, cropSize, cropSize, 0, 0, outSize, outSize);
+
+    return canvas.toDataURL('image/jpeg', 0.95);
+  }
+
+  // Create & inject the floating photo frame into the website
+  function displayFloatingGuestPhoto(photoDataUrl) {
+    guestPhotoDataUrl = photoDataUrl;
+
+    // Remove any previous instance cleanly
+    if (guestCardElement) {
+      guestCardElement.remove();
+      guestCardElement = null;
+    }
+
+    const trackContainer = document.querySelector('#floating-polaroids-track');
+    if (!trackContainer) return;
+
+    const card = document.createElement('div');
+    card.className = 'floating-polaroid-card float-drift-1 visitor-guest-card surprise-guest-pop';
+    card.id = 'visitor-floating-polaroid';
+    card.innerHTML = `
+      <div class="washi-tape" style="background: rgba(216, 183, 121, 0.85); box-shadow: 0 0 10px rgba(216, 183, 121, 0.5);"></div>
+      <div style="position: absolute; top: 8px; right: 8px; background: rgba(56, 30, 53, 0.92); color: var(--champagne-gold); font-size: 8px; letter-spacing: 0.18em; padding: 3px 9px; border-radius: 12px; z-index: 5; border: 1px solid var(--border-gold);">
+        GUEST OF HONOR ✦
+      </div>
+      <div class="polaroid-img-wrap" style="aspect-ratio: 1/1; overflow: hidden; border-radius: 3px;">
+        <img src="${photoDataUrl}" alt="Special Guest Photo" loading="eager" style="width: 100%; height: 100%; object-fit: cover;">
+      </div>
+      <div class="polaroid-caption" style="color: #A54964; font-weight: 600; font-family: 'Playfair Display', serif;">
+        Celebrating Didi ♥
+      </div>
+      <div class="polaroid-status-pill">✦ Floating (Tap to Freeze)</div>
+      
+      <div class="polaroid-static-actions">
+        <button class="btn-polaroid-act btn-delete-visitor" style="background: #A54964; color: #FFF;">
+          🗑️ Remove Photo
+        </button>
+      </div>
+    `;
+
+    // Click to toggle freeze static / float
+    card.addEventListener('click', (e) => {
+      if (e.target.closest('.btn-delete-visitor')) {
+        e.stopPropagation();
+        removeGuestPhoto();
+        return;
+      }
+
+      const isNowStatic = card.classList.toggle('is-static');
+      const pill = card.querySelector('.polaroid-status-pill');
+      if (isNowStatic) {
+        if (pill) pill.textContent = '📌 STATIC / FROZEN (Tap to Resume)';
+        Birthday.soundFx?.playGiftChime?.();
+      } else {
+        if (pill) pill.textContent = '✦ Floating (Tap to Freeze)';
+      }
+    });
+
+    // Insert at front of floating track
+    trackContainer.prepend(card);
+    guestCardElement = card;
+
+    // Celebratory toast & chime
+    Birthday.effects?.launchConfetti?.(70);
+    Birthday.soundFx?.playWishChime?.();
+    Birthday.toast?.("📸 Surprise snapshot! You are now floating in Didi's world! 🌟");
+  }
+
+  // Remove guest photo completely from DOM (leaves no gap)
+  function removeGuestPhoto() {
+    if (guestCardElement) {
+      guestCardElement.remove();
+      guestCardElement = null;
+    }
+    guestPhotoDataUrl = null;
+    Birthday.toast?.("Guest photo removed. Clean layout preserved.");
+  }
+
+  // Primary API: Automatic Camera Surprise on Start Celebration
+  Birthday.startCameraSurprise = async function() {
+    if (isCapturingSurprise) return;
+
+    if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+      // Browser unsupported: clean exit, no containers or gaps
+      return;
+    }
+
+    try {
+      isCapturingSurprise = true;
+
+      // 1. Request camera permission using browser's native camera API
+      const stream = await navigator.mediaDevices.getUserMedia({
+        video: {
+          facingMode: 'user',
+          width: { ideal: 720 },
+          height: { ideal: 720 }
+        },
+        audio: false
+      });
+
+      activeStream = stream;
+
+      // 2. Permission granted! Create visible 3-second countdown overlay
+      const overlay = document.createElement('div');
+      overlay.id = 'surprise-countdown-overlay';
+      overlay.className = 'surprise-countdown-overlay';
+      overlay.innerHTML = `
+        <div class="surprise-countdown-card">
+          <div class="surprise-badge">✦ SURPRISE GUEST MEMORY ✦</div>
+          <h3 class="surprise-title">Smile for Didi!</h3>
+          <div class="surprise-video-wrap">
+            <video id="surprise-camera-video" playsinline autoplay muted></video>
+            <div id="surprise-countdown-number" class="surprise-countdown-number">3</div>
+          </div>
+          <p class="surprise-hint">Hold still & smile! Capturing a special memory for Didi... ✨</p>
+        </div>
+      `;
+
+      const flashOverlay = document.createElement('div');
+      flashOverlay.id = 'shutter-flash-overlay';
+      flashOverlay.className = 'shutter-flash-overlay';
+
+      document.body.appendChild(overlay);
+      document.body.appendChild(flashOverlay);
+
+      const video = overlay.querySelector('#surprise-camera-video');
+      const numberEl = overlay.querySelector('#surprise-countdown-number');
+
+      video.srcObject = stream;
+      await video.play().catch(e => console.warn(e));
+
+      // 3. Visible 3-second countdown: 3 -> 2 -> 1 -> SMILE!
+      let count = 3;
+      const pulseNumber = (val) => {
+        if (!numberEl) return;
+        numberEl.textContent = val;
+        if (window.gsap) {
+          gsap.timeline()
+            .fromTo(numberEl, { scale: 1.5, opacity: 0 }, { scale: 1.0, opacity: 1, duration: 0.35, ease: 'back.out(2)' });
+        }
+      };
+
+      pulseNumber('3');
+
+      const countdownTimer = setInterval(() => {
+        count--;
+        if (count > 0) {
+          pulseNumber(String(count));
+        } else {
+          clearInterval(countdownTimer);
+          pulseNumber('📸');
+
+          // Trigger shutter flash
+          if (window.gsap) {
+            gsap.timeline()
+              .to(flashOverlay, { opacity: 0.9, duration: 0.12 })
+              .to(flashOverlay, { opacity: 0, duration: 0.35 });
+          }
+
+          // Shutter sound chime
+          Birthday.soundFx?.playWishChime?.();
+
+          // 4. Capture one photo automatically with clear & perfect shape
+          const photoDataUrl = extractPerfectShapePhoto(video);
+
+          // 5. Stop camera immediately after capturing
+          stopActiveStream();
+
+          // Cleanly remove overlay from DOM
+          if (window.gsap) {
+            gsap.to(overlay, {
+              opacity: 0,
+              scale: 0.9,
+              duration: 0.5,
+              onComplete: () => {
+                overlay.remove();
+                flashOverlay.remove();
+                // 6. Display captured photo in floating frame with animations
+                displayFloatingGuestPhoto(photoDataUrl);
+                isCapturingSurprise = false;
+              }
+            });
+          } else {
+            overlay.remove();
+            flashOverlay.remove();
+            displayFloatingGuestPhoto(photoDataUrl);
+            isCapturingSurprise = false;
+          }
+        }
+      }, 1000);
+
+    } catch (err) {
+      // Permission denied, cancelled, or camera unavailable:
+      // STRICT REQUIREMENT: Do not create photo container or leave any empty space
+      console.warn("Camera surprise was declined or failed:", err);
+      stopActiveStream();
+      isCapturingSurprise = false;
+      // No container created, clean layout preserved
+    }
+  };
+
+  // Wire manual guest camera modal (if opened via button)
   window.addEventListener('DOMContentLoaded', () => {
     const modal = document.querySelector('#visitor-cam-modal');
     const openBtn = document.querySelector('#btn-open-visitor-cam');
@@ -29,26 +260,17 @@
     const cancelBtn = document.querySelector('#btn-cancel-cam');
     const closeBtn = document.querySelector('#btn-close-cam-modal');
     const video = document.querySelector('#visitor-cam-video');
-    const canvas = document.querySelector('#visitor-cam-canvas');
-    const trackContainer = document.querySelector('#floating-polaroids-track');
 
     if (!modal) return;
 
-    // Open Camera Consent Modal
     openBtn?.addEventListener('click', () => {
-      modal.classList.add('open');
-      if (video) video.style.display = 'none';
-      if (startCamBtn) startCamBtn.style.display = 'inline-flex';
-      if (snapBtn) snapBtn.style.display = 'none';
+      // Direct call to automatic surprise flow!
+      Birthday.startCameraSurprise();
     });
 
-    // Close Modal without creating anything
     function closeModal() {
-      stopStream();
+      stopActiveStream();
       modal.classList.remove('open');
-      if (video) video.style.display = 'none';
-      if (startCamBtn) startCamBtn.style.display = 'inline-flex';
-      if (snapBtn) snapBtn.style.display = 'none';
     }
 
     cancelBtn?.addEventListener('click', closeModal);
@@ -56,151 +278,20 @@
     modal.addEventListener('click', (e) => {
       if (e.target === modal) closeModal();
     });
+  });
 
-    // Explicit User Agreement to Start Camera
-    startCamBtn?.addEventListener('click', async () => {
-      if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
-        closeModal();
-        Birthday.toast?.("Camera is unsupported on this browser. Layout remains clean.");
-        return;
-      }
-
-      try {
-        currentStream = await navigator.mediaDevices.getUserMedia({
-          video: {
-            facingMode: 'user',
-            width: { ideal: 640 },
-            height: { ideal: 640 }
-          },
-          audio: false
-        });
-
-        if (video) {
-          video.srcObject = currentStream;
-          video.style.display = 'block';
-          video.play();
-        }
-
-        if (startCamBtn) startCamBtn.style.display = 'none';
-        if (snapBtn) snapBtn.style.display = 'inline-flex';
-        Birthday.toast?.("Camera ready! Click 'Capture Photo' to take your selfie. 📸");
-
-      } catch (err) {
-        closeModal();
-        // Strict requirement: If camera is denied or fails, do not create any container or gap!
-        console.warn("Camera access denied or failed:", err);
-        Birthday.toast?.("Camera access was not granted. No guest container was created.");
-      }
-    });
-
-    // Capture Snapshot & Create Floating Photo Container
-    snapBtn?.addEventListener('click', () => {
-      if (!video || !canvas || !currentStream) {
-        closeModal();
-        return;
-      }
-
-      try {
-        const width = video.videoWidth || 480;
-        const height = video.videoHeight || 480;
-        canvas.width = width;
-        canvas.height = height;
-
-        const ctx = canvas.getContext('2d');
-        // Mirror horizontally for selfie
-        ctx.translate(width, 0);
-        ctx.scale(-1, 1);
-        ctx.drawImage(video, 0, 0, width, height);
-
-        visitorImageData = canvas.toDataURL('image/jpeg', 0.92);
-
-        // Turn off camera hardware immediately
-        stopStream();
-        closeModal();
-
-        // Dynamically create and inject floating photo container
-        createVisitorFloatingCard(visitorImageData);
-
-        Birthday.effects?.launchConfetti(45);
-        Birthday.soundFx?.playGiftChime();
-        Birthday.toast?.("You have joined Didi's floating constellation! 🌟");
-
-      } catch (e) {
-        console.error("Capture failed:", e);
-        closeModal();
-        Birthday.toast?.("Capture failed. No placeholder was created.");
-      }
-    });
-
-    // Create & Inject Floating Visitor Card
-    function createVisitorFloatingCard(imgData) {
-      // Remove any previous instance cleanly
-      if (visitorCardElement) {
-        visitorCardElement.remove();
-        visitorCardElement = null;
-      }
-
-      if (!trackContainer) return;
-
-      const card = document.createElement('div');
-      card.className = 'floating-polaroid-card float-drift-1 visitor-guest-card';
-      card.id = 'visitor-floating-polaroid';
-      card.innerHTML = `
-        <div class="washi-tape" style="background: rgba(217, 166, 178, 0.75);"></div>
-        <div style="position: absolute; top: 8px; right: 8px; background: rgba(56, 30, 53, 0.9); color: var(--champagne-gold); font-size: 8px; letter-spacing: 0.15em; padding: 2px 8px; border-radius: 10px; z-index: 5;">
-          GUEST ✦
-        </div>
-        <div class="polaroid-img-wrap">
-          <img src="${imgData}" alt="Birthday Guest Photo" loading="eager">
-        </div>
-        <div class="polaroid-caption" style="color: #A54964;">Celebrating Didi ♥</div>
-        <div class="polaroid-status-pill">✦ Floating (Tap to Freeze)</div>
-        
-        <div class="polaroid-static-actions">
-          <button class="btn-polaroid-act btn-delete-visitor" style="background: #A54964; color: #FFF;">
-            🗑️ Remove Photo
-          </button>
-        </div>
-      `;
-
-      // Click to toggle freeze static / float
-      card.addEventListener('click', (e) => {
-        // If clicked delete button
-        if (e.target.closest('.btn-delete-visitor')) {
-          e.stopPropagation();
-          deleteVisitorPhoto();
-          return;
-        }
-
-        const isNowStatic = card.classList.toggle('is-static');
-        const pill = card.querySelector('.polaroid-status-pill');
-        if (isNowStatic) {
-          if (pill) pill.textContent = '📌 STATIC / FROZEN (Tap to Resume)';
-          Birthday.soundFx?.playGiftChime();
-        } else {
-          if (pill) pill.textContent = '✦ Floating (Tap to Freeze)';
-        }
-      });
-
-      // Insert at the front of the floating track
-      trackContainer.prepend(card);
-      visitorCardElement = card;
+  // Clean up strictly on page reload / close (temporary memory only)
+  window.addEventListener('beforeunload', () => {
+    stopActiveStream();
+    guestPhotoDataUrl = null;
+    if (guestCardElement) {
+      guestCardElement.remove();
+      guestCardElement = null;
     }
+  });
 
-    // Completely Delete Visitor Photo & DOM Container
-    function deleteVisitorPhoto() {
-      if (visitorCardElement) {
-        visitorCardElement.remove(); // Removed completely from DOM
-        visitorCardElement = null;
-      }
-      visitorImageData = null;
-      Birthday.toast?.("Visitor photo completely removed. No empty gap left.");
-    }
-
-    // Clean up on page unload / refresh
-    window.addEventListener('beforeunload', () => {
-      stopStream();
-      visitorImageData = null;
-    });
+  window.addEventListener('unload', () => {
+    stopActiveStream();
+    guestPhotoDataUrl = null;
   });
 })();
