@@ -319,52 +319,77 @@
 
     museumScene = new T.Scene();
     museumCamera = new T.PerspectiveCamera(45, (rect.width || 800) / (rect.height || 600), 0.1, 100);
-    museumCamera.position.set(0, 0, 8);
+    museumCamera.position.set(0, 0.3, 8.6);
 
     // Warm museum studio lighting
-    const amb = new T.AmbientLight(0xFFF7EC, 1.2);
+    const amb = new T.AmbientLight(0xFFF7EC, 1.5);
     museumScene.add(amb);
     const dir = new T.DirectionalLight(0xD8B779, 1.8);
     dir.position.set(4, 6, 7);
     museumScene.add(dir);
+    const dirBack = new T.DirectionalLight(0xFFECC2, 1.2);
+    dirBack.position.set(-4, 3, -6);
+    museumScene.add(dirBack);
 
     const textureLoader = new T.TextureLoader();
-    const photos = Birthday.galleryPhotos || [];
 
-    // Create 3D floating gallery in a linear horizontal ribbon drifting Left to Right (NOT round)
-    const total = photos.length || 7;
-    const spacing = 3.6;
-    const totalSpan = total * spacing;
-    const halfSpan = totalSpan / 2;
+    // Automatically detect and load all available photo assets without assuming 3 images or fixed count
+    const defaultProjectPhotos = [
+      { id: 'photo-1', url: 'assets/images/garden-rose.jpg', title: 'A Blossom in the Sunlight', caption: 'Radiant, timeless, and smiling with the roses.' },
+      { id: 'photo-2', url: 'assets/images/temple-steps.jpg', title: 'Serenity & Quiet Wisdom', caption: 'Elegance in quiet contemplation on carved wooden steps.' },
+      { id: 'photo-3', url: 'assets/images/couture-grace.jpg', title: 'Starlight & Royal Couture', caption: 'An evening of royalty, shimmering couture, and diamond grace.' },
+      { id: 'photo-4', url: 'assets/images/himachali-heritage.jpg', title: 'Tradition, Laughter & Roots', caption: 'Traditional Himachali elegance and sibling bond.' },
+      { id: 'photo-5', url: 'assets/images/family-harmony.jpg', title: 'Roots & Unbreakable Love', caption: 'Surrounded by loving family under the shade of trees.' },
+      { id: 'photo-6', url: 'assets/images/mom-and-didi.jpg', title: 'Mother’s Sweetest Blessing', caption: 'Birthday tiara, pure sweetness, and Mom’s love.' },
+      { id: 'photo-7', url: 'assets/images/royal-celebration.jpg', title: 'The Queen of Our Universe', caption: 'Grand celebration under crystal chandeliers.' }
+    ];
+
+    const photos = (window.Birthday && window.Birthday.galleryPhotos && window.Birthday.galleryPhotos.length)
+      ? window.Birthday.galleryPhotos
+      : defaultProjectPhotos;
+
+    const total = photos.length;
+    const radius = Math.max(5.2, total * 0.78);
 
     photos.forEach((photo, idx) => {
-      const initialX = (idx - total / 2) * spacing;
+      const baseAngle = (idx / total) * Math.PI * 2;
 
       const frameGroup = new T.Group();
-      frameGroup.position.set(initialX, 0, 0);
-      frameGroup.rotation.y = 0; // Flat facing the viewer, linear Left to Right (NOT round)
+      frameGroup.position.set(Math.sin(baseAngle) * radius, 0, Math.cos(baseAngle) * radius);
+      frameGroup.rotation.y = baseAngle;
 
       // Beveled Gold Frame Border
-      const frameGeo = new T.BoxGeometry(2.3, 3.0, 0.08);
+      let initialW = 2.4, initialH = 2.8;
+      const frameGeo = new T.BoxGeometry(initialW + 0.22, initialH + 0.22, 0.08);
       const frameMat = new T.MeshStandardMaterial({
         color: 0xD8B779,
-        metalness: 0.8,
+        metalness: 0.85,
         roughness: 0.25,
-        emissive: 0x483616,
-        emissiveIntensity: 0.2
+        emissive: 0x381E35,
+        emissiveIntensity: 0.15
       });
       const frameBorder = new T.Mesh(frameGeo, frameMat);
       frameGroup.add(frameBorder);
 
       // Inner Photo Plane
-      const photoGeo = new T.PlaneGeometry(2.1, 2.8);
-      const photoMat = new T.MeshBasicMaterial({ color: 0x2A1735 });
+      const photoGeo = new T.PlaneGeometry(initialW, initialH);
+      const photoMat = new T.MeshBasicMaterial({ color: 0xFFFFFF });
 
       textureLoader.load(photo.url, (tex) => {
         tex.generateMipmaps = true;
         photoMat.map = tex;
-        photoMat.color.setHex(0xFFFFFF);
         photoMat.needsUpdate = true;
+
+        // Preserve original image proportions and avoid any distortion
+        if (tex.image && tex.image.width && tex.image.height) {
+          const imgAspect = tex.image.width / tex.image.height;
+          const targetH = 2.8;
+          const targetW = targetH * imgAspect;
+          photoMesh.geometry.dispose();
+          photoMesh.geometry = new T.PlaneGeometry(targetW, targetH);
+          frameBorder.geometry.dispose();
+          frameBorder.geometry = new T.BoxGeometry(targetW + 0.22, targetH + 0.22, 0.08);
+        }
       });
 
       const photoMesh = new T.Mesh(photoGeo, photoMat);
@@ -376,7 +401,15 @@
       photoMesh.userData = { id: photo.id, index: idx };
 
       museumScene.add(frameGroup);
-      museumFrames.push({ group: frameGroup, data: photo, angle, index: idx });
+      museumFrames.push({
+        group: frameGroup,
+        data: photo,
+        angle: baseAngle,
+        baseAngle: baseAngle,
+        index: idx,
+        floatSpeed: 0.85 + (idx % 4) * 0.2,
+        floatPhase: idx * 1.2
+      });
     });
 
     // Raycaster for clicking 3D frames
@@ -409,7 +442,7 @@
       if (!isDragging) return;
       const deltaX = (e.clientX - prevX) * 0.005;
       prevX = e.clientX;
-      museumScene.rotation.y += deltaX;
+      museumFrames.forEach(f => { f.angle += deltaX; });
     });
 
     // Touch support
@@ -418,7 +451,7 @@
     canvas.addEventListener('touchmove', (e) => {
       const deltaX = (e.touches[0].clientX - touchPrevX) * 0.006;
       touchPrevX = e.touches[0].clientX;
-      museumScene.rotation.y += deltaX;
+      museumFrames.forEach(f => { f.angle += deltaX; });
     }, { passive: true });
 
     let isMuseumFloating = true;
@@ -427,33 +460,54 @@
       const hint = document.querySelector('.museum-hint');
       const toggleBtn = document.querySelector('#btn-toggle-3d-float');
       if (isMuseumFloating) {
-        if (hint) hint.innerHTML = '✦ FLOATING LEFT TO RIGHT &nbsp;·&nbsp; (Click Frame to Freeze Static)';
+        if (hint) hint.innerHTML = '✦ FLOATING 3D ORBIT &nbsp;·&nbsp; (Click Frame to Freeze Static)';
         if (toggleBtn) toggleBtn.innerHTML = '⏸ Freeze Static View';
+        if (window.gsap) {
+          museumFrames.forEach(f => {
+            gsap.to(f.group.scale, { x: 1, y: 1, z: 1, duration: 0.6 });
+          });
+        }
       } else {
-        if (hint) hint.innerHTML = '📌 STATIC VIEW LOCKED &nbsp;·&nbsp; (Tap to Resume Left-to-Right Float)';
-        if (toggleBtn) toggleBtn.innerHTML = '▶ Resume Left-to-Right Float';
+        if (hint) hint.innerHTML = '📌 STATIC VIEW LOCKED &nbsp;·&nbsp; (Tap to Resume 3D Float)';
+        if (toggleBtn) toggleBtn.innerHTML = '▶ Resume 3D Float';
       }
     }
 
     function renderMuseum() {
       requestAnimationFrame(renderMuseum);
       const time = performance.now() * 0.001;
+
+      // Dynamic canvas resize check
+      const w = canvas.clientWidth || 800;
+      const h = canvas.clientHeight || 600;
+      if (canvas.width !== w || canvas.height !== h) {
+        museumRenderer.setSize(w, h, false);
+        museumCamera.aspect = w / h;
+        museumCamera.updateProjectionMatrix();
+      }
+
       if (isMuseumFloating) {
-        // Continuous smooth Left-to-Right drift along X-axis!
         museumFrames.forEach((f) => {
-          f.group.position.x += 0.015; // Smooth Left-to-Right drift!
-          if (f.group.position.x > halfSpan) {
-            f.group.position.x -= totalSpan; // Seamless wrap-around!
-          }
-          // Gentle floating vertical wave
-          f.group.position.y = Math.sin(time * 1.2 + f.index * 0.9) * 0.12;
-          f.group.rotation.z = Math.sin(time * 0.8 + f.index) * 0.02;
-        });
-      } else {
-        museumFrames.forEach((f) => {
-          f.group.position.y = 0; // Frozen completely static
+          // Smooth foreground slow-down and background acceleration:
+          // Foreground: cos(angle) > 0 (near camera, Z > 0) -> slow down
+          // Background: cos(angle) < 0 (far from camera, Z < 0) -> accelerate fast
+          const bgFactor = (1 - Math.cos(f.angle)) * 0.5; // 0 in foreground center, 1 in background center
+          const orbitalSpeed = 0.0028 + Math.pow(bgFactor, 1.8) * 0.016;
+
+          f.angle = (f.angle + orbitalSpeed) % (Math.PI * 2);
+
+          // Position in 3D orbit
+          f.group.position.x = Math.sin(f.angle) * radius;
+          f.group.position.z = Math.cos(f.angle) * radius;
+
+          // Independent organic flying float wave and tilt
+          f.group.position.y = Math.sin(time * f.floatSpeed + f.floatPhase) * 0.22;
+          f.group.rotation.y = f.angle;
+          f.group.rotation.z = Math.sin(time * 0.9 + f.index) * 0.035;
+          f.group.rotation.x = Math.cos(time * 0.7 + f.index) * 0.025;
         });
       }
+
       museumRenderer.render(museumScene, museumCamera);
     }
     renderMuseum();
@@ -495,25 +549,42 @@
     // On clicking a frame, it becomes STATIC!
     isMuseumFloating = false;
     updateMuseumFloatingUI();
-    Birthday.toast?.("Photograph focused & locked static. Tap hint to resume left-to-right float! 📌");
+    Birthday.toast?.("Photograph focused & locked static. Tap hint to resume 3D float! 📌");
 
-    // Center the selected frame smoothly along X-axis
-    const total = Birthday.galleryPhotos?.length || 7;
-    const spacing = 3.6;
-    const totalSpan = total * spacing;
-    const halfSpan = totalSpan / 2;
+    // Center the selected frame smoothly in the front
+    const total = museumFrames.length;
+    const radius = Math.max(5.2, total * 0.78);
 
     if (window.gsap) {
-      const shiftX = target.group.position.x;
-      museumFrames.forEach((f) => {
-        let newX = f.group.position.x - shiftX;
-        while (newX > halfSpan) newX -= totalSpan;
-        while (newX < -halfSpan) newX += totalSpan;
+      const targetAngle = 0;
+      const angleDiff = targetAngle - target.angle;
+
+      museumFrames.forEach((f, i) => {
+        let newAngle = (f.angle + angleDiff) % (Math.PI * 2);
+        if (newAngle > Math.PI) newAngle -= Math.PI * 2;
+        if (newAngle < -Math.PI) newAngle += Math.PI * 2;
+        f.angle = newAngle;
+
+        const isTarget = (f === target);
         gsap.to(f.group.position, {
-          x: newX,
-          y: (f === target ? 0 : f.group.position.y),
-          z: (f === target ? 1.0 : 0),
-          duration: 1.0,
+          x: Math.sin(newAngle) * (radius + (isTarget ? 0.4 : 0)),
+          y: isTarget ? 0 : Math.sin(i * 1.5) * 0.18,
+          z: Math.cos(newAngle) * (radius + (isTarget ? 0.4 : 0)),
+          duration: 0.9,
+          ease: 'power3.out'
+        });
+        gsap.to(f.group.rotation, {
+          y: newAngle,
+          z: 0,
+          x: 0,
+          duration: 0.9,
+          ease: 'power3.out'
+        });
+        gsap.to(f.group.scale, {
+          x: isTarget ? 1.15 : 0.88,
+          y: isTarget ? 1.15 : 0.88,
+          z: isTarget ? 1.15 : 0.88,
+          duration: 0.9,
           ease: 'power3.out'
         });
       });
@@ -564,15 +635,20 @@
     cakeCamera.lookAt(0, 0.4, 0);
 
     // Warm Luxury Lighting
-    const amb = new T.AmbientLight(0xFFF7EC, 1.4);
+    const amb = new T.AmbientLight(0xFFF7EC, 1.6);
     cakeScene.add(amb);
-    const key = new T.PointLight(0xFFECC2, 18, 30);
+    const dir = new T.DirectionalLight(0xFFF7EC, 1.8);
+    dir.position.set(2, 6, 4);
+    cakeScene.add(dir);
+    const key = new T.PointLight(0xFFECC2, 12, 30);
     key.position.set(3, 4, 5);
     cakeScene.add(key);
 
-    const rim = new T.PointLight(0xD9A6B2, 12, 25);
+    const rim = new T.PointLight(0xD9A6B2, 8, 25);
     rim.position.set(-3, 2, -2);
     cakeScene.add(rim);
+    const hemi = new T.HemisphereLight(0xFFE5D9, 0x381E35, 1.0);
+    cakeScene.add(hemi);
 
     cakeGroup = new T.Group();
     cakeScene.add(cakeGroup);
@@ -647,6 +723,15 @@
     // Render loop for cake
     function renderCake() {
       requestAnimationFrame(renderCake);
+
+      const w = canvas.clientWidth || 480;
+      const h = canvas.clientHeight || 380;
+      if (canvas.width !== w || canvas.height !== h) {
+        cakeRenderer.setSize(w, h, false);
+        cakeCamera.aspect = w / h;
+        cakeCamera.updateProjectionMatrix();
+      }
+
       cakeGroup.rotation.y += 0.005;
 
       // Realistic flame flicker
@@ -844,11 +929,11 @@
 
   // Initialize all Three.js systems after window loads
   window.addEventListener('DOMContentLoaded', () => {
-    initUniverse();
+    try { initUniverse(); } catch (err) { console.warn("Universe error:", err); }
     setTimeout(() => {
-      init3DMuseum();
-      init3DCake();
-      init3DDoll();
-    }, 150);
+      try { init3DMuseum(); } catch (err) { console.error("3D Museum error:", err); }
+      try { init3DCake(); } catch (err) { console.error("3D Cake error:", err); }
+      try { init3DDoll(); } catch (err) { console.error("3D Doll error:", err); }
+    }, 100);
   });
 })();
