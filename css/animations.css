@@ -1,0 +1,98 @@
+/* ==========================================================================
+   ANIMATIONS & LUXURY MICRO-INTERACTIONS
+   ========================================================================== */
+
+@keyframes floatSoft {
+  0%, 100% {
+    transform: translateY(0px) rotate(0deg);
+  }
+  50% {
+    transform: translateY(-12px) rotate(2deg);
+  }
+}
+
+@keyframes goldPulse {
+  0%, 100% {
+    box-shadow: 0 0 20px rgba(216, 183, 121, 0.2);
+  }
+  50% {
+    box-shadow: 0 0 40px rgba(216, 183, 121, 0.5);
+  }
+}
+
+@keyframes ribbonUntie {
+  0% {
+    transform: scale(1) rotate(0deg);
+    opacity: 1;
+  }
+  50% {
+    transform: scale(1.2) translateY(-20px) rotate(15deg);
+    opacity: 0.8;
+  }
+  100% {
+    transform: scale(0.4) translateY(-60px) rotate(45deg);
+    opacity: 0;
+  }
+}
+
+/* Smoke puff animation for blown candles */
+.smoke-puff {
+  position: absolute;
+  color: #E8DCE6;
+  font-size: 28px;
+  animation: smokeRise 2.2s ease-out forwards;
+  pointer-events: none;
+  filter: blur(2px);
+  z-index: 100;
+}
+
+@keyframes smokeRise {
+  0% {
+    opacity: 0.8;
+    transform: translateY(0) scale(0.6) rotate(0deg);
+  }
+  100% {
+    opacity: 0;
+    transform: translateY(-110px) scale(2.2) rotate(35deg);
+  }
+}
+
+/* Confetti particles */
+.confetti-particle {
+  position: fixed;
+  top: -20px;
+  width: 10px;
+  height: 14px;
+  pointer-events: none;
+  z-index: 9999;
+  border-radius: 2px;
+  animation: confettiFall 3.8s ease-in forwards;
+}
+
+@keyframes confettiFall {
+  0% {
+    transform: translateY(0) rotate(0deg) translateX(0);
+    opacity: 1;
+  }
+  80% {
+    opacity: 0.9;
+  }
+  100% {
+    transform: translateY(105vh) rotate(720deg) translateX(var(--drift, 60px));
+    opacity: 0;
+  }
+}
+
+/* Magnetic element transitions */
+.magnetic {
+  display: inline-block;
+  transition: transform 0.25s cubic-bezier(0.25, 1, 0.5, 1);
+}
+
+/* Floating animation utilities */
+.floating-slow {
+  animation: floatSoft 6s ease-in-out infinite;
+}
+.floating-mid {
+  animation: floatSoft 4.5s ease-in-out infinite alternate;
+}

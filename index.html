@@ -1,0 +1,642 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#21162D">
+  <meta name="description" content="An Extraordinary World for Didi — A Luxury Cinematic 3D Birthday Experience.">
+  <title>An Extraordinary World for Didi ✦</title>
+
+  <!-- Google Fonts Preconnect & Stylesheets -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400;1,500;1,600&family=Great+Vibes&family=Inter:wght@300;400;500;600;700&family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500;1,600&display=swap" rel="stylesheet">
+
+  <!-- Core Stylesheets -->
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="css/animations.css">
+  <link rel="stylesheet" href="css/responsive.css">
+
+  <!-- Three.js and GSAP Libraries via CDN -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+
+  <!-- Modular Application Scripts -->
+  <script defer src="js/effects.js"></script>
+  <script defer src="js/gallery.js"></script>
+  <script defer src="js/birthday-cake.js"></script>
+  <script defer src="js/gifts.js"></script>
+  <script defer src="js/music.js"></script>
+  <script defer src="js/main.js"></script>
+</head>
+<body>
+
+  <!-- Custom Smooth Luxury Cursor -->
+  <div class="cursor-dot" aria-hidden="true"></div>
+  <div class="cursor-ring" aria-hidden="true"></div>
+
+  <!-- Background 3D Universe Canvas & Film Grain -->
+  <canvas id="universe" aria-hidden="true"></canvas>
+  <div class="film-grain" aria-hidden="true"></div>
+
+  <!-- Welcome Preloader Curtain -->
+  <div class="welcome-screen" id="welcome-screen">
+    <div class="welcome-modal-card">
+      <div class="eyebrow">✦ &nbsp; PRIVATE CELEBRATION ARCHIVE &nbsp; ✦</div>
+      <h1>An Extraordinary World<br><em>for Didi</em></h1>
+      <p>
+        A bespoke digital journey created with endless love. Experience floating memories, celestial 3D art, and heartfelt blessings crafted just for your special day.
+      </p>
+      <button class="btn-luxury-gold" id="btn-enter-experience">
+        ✧ &nbsp; Enter Her World
+      </button>
+      <div style="margin-top: 22px; font-size: 11px; letter-spacing: 0.15em; color: var(--dusty-rose);">
+        CLICK TO UNLOCK SOUND & CELESTIAL AMBIENCE
+      </div>
+    </div>
+  </div>
+
+  <!-- Editorial Topbar Navigation -->
+  <header class="topbar">
+    <a class="brand" href="#home">
+      <div class="brand-monogram">D</div>
+      <div>
+        <div class="brand-text">Didi’s World</div>
+        <span class="brand-sub">AN EXTRAORDINARY UNIVERSE</span>
+      </div>
+    </a>
+
+    <nav>
+      <ul class="nav-links">
+        <li><a href="#home">Universe</a></li>
+        <li><a href="#museum">3D Museum</a></li>
+        <li><a href="#memories">Editorial Gallery</a></li>
+        <li><a href="#cake">The Cake</a></li>
+        <li><a href="#doll">Guardian</a></li>
+        <li><a href="#gifts">Royal Gifts</a></li>
+        <li><a href="#letter">A Letter</a></li>
+      </ul>
+    </nav>
+
+    <div class="top-actions">
+      <button class="btn-luxury-outline" id="btn-play-bday-song-nav" style="padding: 7px 14px; font-size: 10px; color: var(--champagne-gold);" aria-label="Play Happy Birthday Song">
+        🎵 Birthday Song
+      </button>
+
+      <button class="sound-toggle-btn" id="sound-toggle" aria-label="Open Sound Controls">
+        <div class="audio-wave">
+          <span></span><span></span><span></span><span></span>
+        </div>
+        <span>Soundtrack</span>
+      </button>
+    </div>
+  </header>
+
+  <main>
+    <!-- 1. CINEMATIC HERO SECTION -->
+    <section class="hero-section" id="home">
+      <div class="hero-container">
+        
+        <div class="hero-content">
+          <div class="hero-badge">✧ &nbsp; CELESTIAL BIRTHDAY CELEBRATION &nbsp; ✧</div>
+          
+          <div class="hero-title-main">
+            FOR SOMEONE WHO MAKES LIFE MORE BEAUTIFUL
+          </div>
+          
+          <h1 class="hero-title-reveal">
+            MY DEAREST DIDI
+          </h1>
+          
+          <p class="hero-subtitle">
+            “A little universe, created with endless love.”
+          </p>
+
+          <div class="hero-cta-group">
+            <a class="btn-luxury-gold" href="#museum">
+              ✧ &nbsp; Enter Her World
+            </a>
+            <a class="btn-luxury-outline" href="#memories">
+              Explore Memories ↓
+            </a>
+          </div>
+
+          <div class="hero-dedication">
+            A timeless surprise from your forever-grateful younger sibling
+          </div>
+        </div>
+
+        <div class="hero-artwork">
+          <div class="celestial-orbit-wrapper">
+            <div class="orbit-ring ring-1"></div>
+            <div class="orbit-ring ring-2"></div>
+
+            <div class="editorial-arch-frame">
+              <div class="arch-image-inner">
+                <img src="assets/images/garden-rose.jpg" alt="Didi Editorial Portrait" loading="eager">
+              </div>
+              <div class="arch-overlay-badge">
+                ✦ &nbsp; THE BIRTHDAY QUEEN &nbsp; ✦
+              </div>
+            </div>
+
+            <span class="floating-gem gem-1">✧</span>
+            <span class="floating-gem gem-2">✦</span>
+            <span class="floating-gem gem-3">❊</span>
+          </div>
+        </div>
+
+      </div>
+
+      <div class="hero-scroll-indicator">
+        <span>01 / AN EXTRAORDINARY WORLD</span>
+        <span>SCROLL TO UNVEIL THE MAGIC ↓</span>
+        <span>CELEBRATING DIDI</span>
+      </div>
+    </section>
+
+    <!-- 2. CINEMATIC INTRO BAND & QUOTE -->
+    <section class="intro-quote-band">
+      <div class="quote-container">
+        <span class="quote-mark">“</span>
+        <blockquote class="intro-quote-text">
+          No matter how grown up we become,<br>
+          <em>I will always be your little sibling.</em>
+        </blockquote>
+        <div class="quote-author">✦ &nbsp; WRITTEN IN STARLIGHT &nbsp; ✦</div>
+      </div>
+    </section>
+
+    <!-- 3. LUXURY 3D MEMORY MUSEUM -->
+    <section class="museum-section" id="museum">
+      <div class="museum-header">
+        <div class="eyebrow">✦ &nbsp; IMMERSIVE MEMORY ARCHIVE &nbsp; ✦</div>
+        <h2 class="section-title">Walking Through <em>Our Story</em></h2>
+        <p class="section-desc">
+          Photographs floating inside a dark fantasy universe. Each golden frame holds a treasured memory — drag to explore or tap any frame to focus.
+        </p>
+      </div>
+
+      <div class="three-museum-stage">
+        <canvas id="three-museum-canvas" aria-label="Interactive 3D Memory Museum"></canvas>
+
+        <div class="museum-ui-overlay">
+          <div class="museum-controls-bar">
+            <span class="museum-hint">✦ DRAG TO ROTATE 3D SPACE ✦</span>
+            <div class="museum-nav-buttons">
+              <button class="museum-nav-btn" id="museum-btn-prev" aria-label="Previous Memory">‹</button>
+              <button class="museum-nav-btn" id="museum-btn-next" aria-label="Next Memory">›</button>
+            </div>
+          </div>
+
+          <div class="museum-active-card show" id="museum-active-card">
+            <h4 id="museum-card-title">A Blossom in the Sunlight</h4>
+            <p id="museum-card-desc">Radiant, timeless, and smiling with the roses. A moment capturing your natural warmth.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 4. EDITORIAL PHOTO PRESENTATION & SPOTLIGHT -->
+    <section class="editorial-gallery-section" id="memories">
+      <div class="gallery-topbar">
+        <div>
+          <div class="eyebrow">✦ &nbsp; HIGH FASHION EDITORIAL PRESENTATION &nbsp; ✦</div>
+          <h2 class="section-title">Portraits of <em>Pure Elegance</em></h2>
+          <p class="section-desc">
+            Asymmetrical editorial compositions celebrating Didi. In group photos, Didi is distinguished with a soft champagne-gold spotlight while preserving every smile.
+          </p>
+        </div>
+
+        <div class="gallery-upload-wrapper">
+          <div class="gallery-filter-tabs">
+            <button class="filter-btn active" data-filter="all">All Memories</button>
+            <button class="filter-btn" data-filter="individual">Just Didi</button>
+            <button class="filter-btn" data-filter="group">Family & Celebrations</button>
+          </div>
+
+          <label class="btn-luxury-outline" for="photo-input" style="padding: 10px 18px; font-size: 10px;">
+            ＋ Add Photos
+          </label>
+          <input type="file" id="photo-input" accept="image/*" multiple hidden>
+        </div>
+      </div>
+
+      <div class="editorial-grid" id="editorial-grid">
+        <!-- Rendered dynamically by js/gallery.js -->
+      </div>
+    </section>
+
+    <!-- 5. PREMIUM 3D BIRTHDAY CAKE -->
+    <section class="cake-experience-section" id="cake">
+      <div class="cake-stage-container">
+        <div class="eyebrow">✦ &nbsp; A SACRED CELEBRATION MOMENT &nbsp; ✦</div>
+        
+        <div class="cake-canvas-wrap">
+          <canvas id="three-cake" aria-label="3D Tiered Birthday Cake with Flickering Candles"></canvas>
+        </div>
+
+        <h2 class="cake-heading" id="cake-title">
+          Close your eyes, Didi.<br><em>Make a sacred wish.</em>
+        </h2>
+
+        <div class="cake-message-box" id="cake-desc">
+          “May this milestone year bring you boundless happiness, divine peace, and memories sweeter than honey.”
+        </div>
+
+        <div class="cake-interactive-actions">
+          <button class="btn-luxury-gold" id="blow-candles">
+            ✧ &nbsp; Make a wish
+          </button>
+          <button class="btn-luxury-outline" id="btn-play-bday-song-cake">
+            🎵 &nbsp; Play Birthday Song
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <!-- 6. 3D PRINCESS GUARDIAN DOLL -->
+    <section class="doll-section" id="doll">
+      <div class="doll-canvas-stage">
+        <canvas id="three-doll-canvas" aria-label="3D Stylized Princess Character"></canvas>
+        <div class="doll-speech-bubble" id="doll-speech-bubble">
+          Hello Didi! Today, the entire universe was created just for you! ✨
+        </div>
+      </div>
+
+      <div class="doll-content-wrap">
+        <div class="eyebrow">✦ &nbsp; YOUR CELESTIAL COMPANION &nbsp; ✦</div>
+        <h2 class="section-title">The Birthday <em>Princess Guardian</em></h2>
+        <p>
+          Standing sentinel over your world of memories, this guardian brings smiles, cheerful messages, and gentle blessings whenever you visit.
+        </p>
+        <button class="btn-luxury-outline" id="btn-doll-talk">
+          ✧ &nbsp; Hear A Sweet Greeting &nbsp; ↗
+        </button>
+      </div>
+    </section>
+
+    <!-- 7. LUXURY INTERACTIVE GIFT EXPERIENCE -->
+    <section class="gifts-section" id="gifts">
+      <div class="gifts-header">
+        <div class="eyebrow">✦ &nbsp; ROYAL WRAPPED PRESENTS &nbsp; ✦</div>
+        <h2 class="section-title">Something Special <em>To Unwrap</em></h2>
+        <p class="section-desc">
+          Each luxury box is wrapped in champagne satin ribbons and holds a unique treasure. Tap any present to untie its ribbon.
+        </p>
+      </div>
+
+      <div class="gifts-grid">
+        <!-- Gift 1 -->
+        <div class="luxury-gift-card" data-gift="letter">
+          <div class="gift-box-3d-visual">
+            <svg class="gift-icon-svg" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <rect x="15" y="38" width="70" height="52" rx="4" fill="url(#giftGrad)" stroke="#D8B779" stroke-width="2"/>
+              <rect x="10" y="26" width="80" height="16" rx="3" fill="#D8B779"/>
+              <rect x="46" y="26" width="8" height="64" fill="#381E35"/>
+              <path d="M50 26C35 12 30 20 46 26Z" fill="#D8B779"/>
+              <path d="M50 26C65 12 70 20 54 26Z" fill="#D8B779"/>
+              <defs>
+                <linearGradient id="giftGrad" x1="15" y1="38" x2="85" y2="90" gradientUnits="userSpaceOnUse">
+                  <stop stop-color="#462343"/>
+                  <stop offset="1" stop-color="#21162D"/>
+                </linearGradient>
+              </defs>
+            </svg>
+          </div>
+          <div class="gift-tag">GIFT 01</div>
+          <h3>A Sister’s Letter</h3>
+          <p>A few heartfelt words from your younger sibling that mean the world.</p>
+          <span class="gift-open-badge">Untie Ribbon ✦</span>
+        </div>
+
+        <!-- Gift 2 -->
+        <div class="luxury-gift-card" data-gift="memories">
+          <div class="gift-box-3d-visual">
+            <svg class="gift-icon-svg" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <rect x="15" y="38" width="70" height="52" rx="4" fill="url(#giftGrad2)" stroke="#D9A6B2" stroke-width="2"/>
+              <rect x="10" y="26" width="80" height="16" rx="3" fill="#D9A6B2"/>
+              <rect x="46" y="26" width="8" height="64" fill="#D8B779"/>
+              <path d="M50 26C35 12 30 20 46 26Z" fill="#D9A6B2"/>
+              <path d="M50 26C65 12 70 20 54 26Z" fill="#D9A6B2"/>
+              <defs>
+                <linearGradient id="giftGrad2" x1="15" y1="38" x2="85" y2="90" gradientUnits="userSpaceOnUse">
+                  <stop stop-color="#552B4D"/>
+                  <stop offset="1" stop-color="#281434"/>
+                </linearGradient>
+              </defs>
+            </svg>
+          </div>
+          <div class="gift-tag">GIFT 02</div>
+          <h3>Golden Milestones</h3>
+          <p>A private curated montage of the moments we hold closest to heart.</p>
+          <span class="gift-open-badge">Untie Ribbon ✦</span>
+        </div>
+
+        <!-- Gift 3 -->
+        <div class="luxury-gift-card" data-gift="wishes">
+          <div class="gift-box-3d-visual">
+            <svg class="gift-icon-svg" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <rect x="15" y="38" width="70" height="52" rx="4" fill="url(#giftGrad3)" stroke="#D8B779" stroke-width="2"/>
+              <rect x="10" y="26" width="80" height="16" rx="3" fill="#D8B779"/>
+              <rect x="46" y="26" width="8" height="64" fill="#FFF7EC"/>
+              <path d="M50 26C35 12 30 20 46 26Z" fill="#D8B779"/>
+              <path d="M50 26C65 12 70 20 54 26Z" fill="#D8B779"/>
+              <defs>
+                <linearGradient id="giftGrad3" x1="15" y1="38" x2="85" y2="90" gradientUnits="userSpaceOnUse">
+                  <stop stop-color="#381E35"/>
+                  <stop offset="1" stop-color="#190D21"/>
+                </linearGradient>
+              </defs>
+            </svg>
+          </div>
+          <div class="gift-tag">GIFT 03</div>
+          <h3>A Thousand Wishes</h3>
+          <p>For every aspiration, peace of mind, and joy you rightfully deserve.</p>
+          <span class="gift-open-badge">Untie Ribbon ✦</span>
+        </div>
+
+        <!-- Gift 4 -->
+        <div class="luxury-gift-card" data-gift="surprise">
+          <div class="gift-box-3d-visual">
+            <svg class="gift-icon-svg" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <rect x="15" y="38" width="70" height="52" rx="4" fill="url(#giftGrad4)" stroke="#ECCB93" stroke-width="2"/>
+              <rect x="10" y="26" width="80" height="16" rx="3" fill="#ECCB93"/>
+              <rect x="46" y="26" width="8" height="64" fill="#A54964"/>
+              <path d="M50 26C35 12 30 20 46 26Z" fill="#ECCB93"/>
+              <path d="M50 26C65 12 70 20 54 26Z" fill="#ECCB93"/>
+              <defs>
+                <linearGradient id="giftGrad4" x1="15" y1="38" x2="85" y2="90" gradientUnits="userSpaceOnUse">
+                  <stop stop-color="#5E2B52"/>
+                  <stop offset="1" stop-color="#21162D"/>
+                </linearGradient>
+              </defs>
+            </svg>
+          </div>
+          <div class="gift-tag">GIFT 04</div>
+          <h3>Secret Surprise</h3>
+          <p>One more royal gesture crafted especially for Didi’s celebration.</p>
+          <span class="gift-open-badge">Untie Ribbon ✦</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- 8. EMOTIONAL INTERACTIVE LETTER EXPERIENCE -->
+    <section class="letter-section" id="letter">
+      <div class="envelope-experience-wrapper">
+        
+        <!-- Closed Envelope Presentation -->
+        <div class="envelope-closed-stage" id="envelope-closed-stage">
+          <div class="eyebrow">✦ &nbsp; SEALED WITH ENDLESS LOVE &nbsp; ✦</div>
+          <h2 class="section-title" style="margin-bottom: 24px;">A Letter For <em>My Dearest Didi</em></h2>
+          <p class="section-desc" style="margin: 0 auto 36px; text-align: center;">
+            This letter is locked with a royal wax seal. Tap the seal or the button below to break the seal and unfold the message.
+          </p>
+
+          <div class="luxury-envelope" id="interactive-envelope" aria-label="Interactive 3D Envelope">
+            <div class="envelope-liner">
+              <span class="envelope-liner-text">✦ FOR DIDI’S EYES ONLY ✦</span>
+            </div>
+            
+            <div class="envelope-flap" id="envelope-flap">
+              <div class="envelope-wax-seal" id="envelope-wax-seal" title="Tap to Break Golden Seal">
+                D
+              </div>
+            </div>
+          </div>
+
+          <button class="btn-luxury-gold" id="btn-break-seal">
+            ✧ &nbsp; Break Golden Seal & Open Letter
+          </button>
+        </div>
+
+        <!-- Opened Interactive Letter Presentation -->
+        <div class="interactive-letter-display" id="interactive-letter-display">
+          
+          <div class="letter-header-bar">
+            <div class="letter-chapter-nav">
+              <button class="letter-nav-tab active" data-chapter="letter">1. The Sister’s Letter</button>
+              <button class="letter-nav-tab" data-chapter="gratitude">2. Gratitude: How You Improved My Life</button>
+              <button class="letter-nav-tab" data-chapter="promise">3. My Forever Promise</button>
+            </div>
+
+            <button class="btn-reseal-letter" id="btn-reseal-letter">
+              ↺ Fold & Reseal Letter
+            </button>
+          </div>
+
+          <div class="letter-paper">
+            <div class="gold-wax-seal">✦</div>
+
+            <!-- Chapter 1: The Sister's Heartfelt Letter -->
+            <div class="letter-chapter active" id="chapter-letter">
+              <h2 class="letter-heading">
+                WORDS THAT I MAY NOT SAY EVERY DAY
+              </h2>
+
+              <div class="letter-body">
+                <p>
+                  Didi, life is a little more beautiful because you are part of mine.
+                </p>
+                <p>
+                  You have always been someone I look up to, someone who inspires me, and someone I will always be grateful for.
+                </p>
+                <p>
+                  We may tease each other, argue over silly things, and have countless funny moments, but there is one thing that will never change.
+                </p>
+                <p>
+                  You will always be one of the most special people in my life.
+                </p>
+                <p>
+                  I hope this new year of your life brings you endless happiness, beautiful opportunities, good health, and every dream your heart holds.
+                </p>
+                <p>
+                  Keep smiling, keep shining, and never stop being you.
+                </p>
+              </div>
+
+              <div class="letter-signature">
+                Happy Birthday, Didi. Lots of love from your little sibling.
+              </div>
+              <div class="letter-sign-note">
+                FOREVER PROUD TO CALL YOU MY SISTER
+              </div>
+            </div>
+
+            <!-- Chapter 2: Gratitude: How You Improved My Life -->
+            <div class="letter-chapter" id="chapter-gratitude">
+              <h2 class="letter-heading">
+                HOW YOU IMPROVED MY LIFE & SHAPED MY WORLD
+              </h2>
+
+              <div class="letter-body">
+                <p>
+                  Didi, looking back at every milestone of my life, there is one constant thread running through every single achievement: <b>you.</b>
+                </p>
+                <div class="gratitude-callout-box">
+                  “When I doubted myself, you were my loudest believer. When I stumbled, you didn't judge me — you held out your hand and helped me rise with quiet dignity.”
+                </div>
+                <p>
+                  You taught me how to treat people with kindness. You showed me what patience looks like under pressure. You worked hard, achieved so much, and set a bar of excellence that inspires me every morning.
+                </p>
+                <p>
+                  Thank you for shielding me from worries when I was young, for listening to my rants without complaining, and for making our home a sanctuary of laughter and warmth. My life is richer, safer, and infinitely more meaningful because of your unconditional guidance.
+                </p>
+              </div>
+
+              <div class="letter-signature">
+                With deepest gratitude & eternal respect, your little sibling.
+              </div>
+            </div>
+
+            <!-- Chapter 3: Sibling's Forever Promise -->
+            <div class="letter-chapter" id="chapter-promise">
+              <span class="forever-vow-badge">✦ AN ETERNAL SIBLING VOW ✦</span>
+              <h2 class="letter-heading">
+                PROMISE ME YOU WILL BE WITH ME FOREVER
+              </h2>
+
+              <div class="letter-body">
+                <p style="font-style: italic; font-size: 22px; color: #381E35; line-height: 2;">
+                  Through changing years and seasons new,<br>
+                  My world is anchored close to you.<br>
+                  No matter where our paths may lead,<br>
+                  Your love is everything I need.<br>
+                  So promise me, as candles gleam,<br>
+                  You'll stay beside me in every dream.<br>
+                  Today, tomorrow, and eternity:<br>
+                  Forever my Didi you shall be.
+                </p>
+
+                <div class="gratitude-callout-box">
+                  “No matter how old we grow or what distances life creates, I will always be the same little sibling who comes running to you for advice, laughter, and comfort. Stay by my side forever.”
+                </div>
+              </div>
+
+              <div class="letter-signature">
+                Forever & Always, Your Little Sibling ♥
+              </div>
+            </div>
+
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- 9. GRAND FINALE CELEBRATION -->
+    <section class="finale-section" id="celebrate">
+      <div class="finale-card">
+        <div class="eyebrow">✦ &nbsp; TODAY THE UNIVERSE HONORS YOU &nbsp; ✦</div>
+        <h2 class="finale-title">Happy Birthday, Didi!</h2>
+        <p class="finale-desc">
+          You are one of the greatest blessings in my life. Keep smiling, keep shining, and making the world more beautiful.
+        </p>
+        <button class="btn-luxury-gold" id="btn-celebrate-again">
+          ✧ &nbsp; Celebrate Again &nbsp; ✧
+        </button>
+      </div>
+    </section>
+  </main>
+
+  <!-- Luxury Footer -->
+  <footer class="luxury-footer">
+    <div>Made with endless love &nbsp; ✦ &nbsp; For my dearest Didi &nbsp; ✦ &nbsp; Happy Birthday</div>
+  </footer>
+
+  <!-- Lightbox Modal for Editorial Photo View, Thematic Poems & Spotlight -->
+  <div class="lightbox" id="lightbox" aria-hidden="true">
+    <button class="lightbox-close-btn" id="lightbox-close" aria-label="Close Lightbox">×</button>
+    <button class="lightbox-arrow lightbox-prev" id="lightbox-prev" aria-label="Previous Photo">‹</button>
+
+    <div class="lightbox-content-box">
+      <div class="lightbox-img-area" id="lightbox-img-area">
+        <img id="lightbox-img" src="" alt="Didi Full Resolution">
+        <div class="spotlight-wrapper" id="lightbox-spotlight" style="display: none;">
+          <div class="spotlight-halo"></div>
+          <div class="spotlight-tag">THE BIRTHDAY GIRL ♕</div>
+        </div>
+      </div>
+
+      <div class="lightbox-info-area">
+        <div>
+          <div class="eyebrow">EDITORIAL ARCHIVE & THEMATIC POETRY</div>
+          <h3 id="lightbox-title"></h3>
+          <p id="lightbox-desc"></p>
+
+          <!-- Poetry & Gratitude Block -->
+          <div class="lightbox-poetry-block">
+            <div style="font-size: 10px; letter-spacing: 0.2em; color: var(--champagne-gold); margin-bottom: 8px; text-transform: uppercase;">
+              ✦ Dedicated Sister’s Poem ✦
+            </div>
+            <div class="poem-box" id="lightbox-poem"></div>
+            
+            <div style="font-size: 10px; letter-spacing: 0.2em; color: var(--dusty-rose); margin-bottom: 4px; text-transform: uppercase;">
+              ✦ Gratitude Note ✦
+            </div>
+            <div class="gratitude-note" id="lightbox-gratitude"></div>
+
+            <div style="font-size: 10px; letter-spacing: 0.2em; color: var(--champagne-gold); margin-bottom: 4px; text-transform: uppercase;">
+              ✦ Birthday Blessing ✦
+            </div>
+            <div class="wish-highlight" id="lightbox-wish"></div>
+          </div>
+        </div>
+        <div class="lightbox-tip" id="lightbox-tip"></div>
+      </div>
+    </div>
+
+    <button class="lightbox-arrow lightbox-next" id="lightbox-next" aria-label="Next Photo">›</button>
+  </div>
+
+  <!-- Gift Reveal Modal -->
+  <div class="lightbox" id="gift-modal" aria-hidden="true">
+    <button class="lightbox-close-btn" id="gift-modal-close" aria-label="Close Gift">×</button>
+    <div class="lightbox-content-box gift-modal-content" style="grid-template-columns: 1fr; max-width: 680px; padding: 50px 40px; background: linear-gradient(150deg, #351C39 0%, #1B0E23 100%);">
+      <div style="text-align: center; margin-bottom: 24px;">
+        <div class="eyebrow" id="gift-modal-tag">ROYAL GIFT</div>
+        <h3 id="gift-modal-title" style="font-family: var(--font-display); font-size: 32px; color: var(--champagne-gold);"></h3>
+      </div>
+      <div id="gift-modal-body"></div>
+    </div>
+  </div>
+
+  <!-- Floating Luxury Music Controls Panel -->
+  <aside class="music-control-panel" id="music-panel" aria-label="Sound Controls">
+    <button class="panel-close-btn" id="panel-close" aria-label="Close Sound Panel">×</button>
+    
+    <div class="music-panel-header">
+      <div class="spinning-disc">♫</div>
+      <div class="music-meta">
+        <b id="song-title">Celestial Reverie</b>
+        <small id="song-status">Generative Ambient Score</small>
+      </div>
+    </div>
+
+    <div class="player-controls-row">
+      <button class="player-circle-btn" id="player-play" aria-label="Play/Pause">▶</button>
+      <button class="btn-luxury-outline" id="player-mute" style="padding: 8px 12px; font-size: 13px;" aria-label="Mute">🔊</button>
+      
+      <div class="volume-slider-wrap">
+        <input type="range" id="player-volume" min="0" max="100" value="65" aria-label="Volume">
+      </div>
+    </div>
+
+    <div style="margin-top: 14px; display: flex; flex-direction: column; gap: 8px;">
+      <button class="btn-luxury-gold" id="btn-bday-song-panel" style="width: 100%; font-size: 10px; padding: 10px;">
+        🎵 Play Happy Birthday Anthem
+      </button>
+
+      <label class="btn-luxury-outline" for="audio-file-input" style="width: 100%; font-size: 9px; cursor: pointer; text-align: center;">
+        ＋ Load Custom Song (MP3 / Audio)
+      </label>
+      <input type="file" id="audio-file-input" accept="audio/*" hidden>
+    </div>
+  </aside>
+
+  <!-- Toast Notification Bar -->
+  <div class="toast-notice" id="toast-notice" role="status"></div>
+
+</body>
+</html>
