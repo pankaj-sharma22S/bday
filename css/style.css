@@ -2415,6 +2415,20 @@ header, main, footer, aside, .lightbox, .message-modal, .welcome-screen {
   margin: 0;
 }
 
+.secret-timer-circle {
+  width: 140px;
+  height: 140px;
+  border-radius: 50%;
+  border: 2px solid var(--champagne-gold);
+  background: radial-gradient(circle, rgba(56, 30, 53, 0.85) 0%, rgba(33, 22, 45, 0.98) 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 0 35px rgba(216, 183, 121, 0.45);
+  position: relative;
+  margin: 12px 0;
+}
+
 .surprise-video-wrap {
   position: relative;
   width: min(240px, 65vw);

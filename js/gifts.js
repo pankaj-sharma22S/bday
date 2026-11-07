@@ -96,7 +96,28 @@
         setTimeout(() => {
           modalTag.textContent = data.tag;
           modalTitle.textContent = data.title;
-          modalBody.innerHTML = data.content;
+
+          // If secret guest photo was captured, reveal it in the Secret Surprise gift box!
+          if (giftType === 'surprise' && Birthday.getGuestPhotoData?.()) {
+            const guestImg = Birthday.getGuestPhotoData();
+            modalBody.innerHTML = `
+              <div style="text-align: center;">
+                <div style="display: inline-block; padding: 12px; background: #FFF7EC; border-radius: 6px; box-shadow: 0 12px 35px rgba(0,0,0,0.65); margin-bottom: 18px; border: 2px solid var(--border-gold);">
+                  <img src="${guestImg}" style="width: min(200px, 50vw); height: min(200px, 50vw); object-fit: cover; border-radius: 4px; display: block;" alt="Secret Surprise Photo">
+                  <div style="font-family: var(--font-script); color: #381E35; font-size: 20px; margin-top: 8px;">Captured Secretly with Love ♥</div>
+                </div>
+                <h4 style="font-family: var(--font-display); font-size: 22px; color: var(--champagne-gold); margin-bottom: 10px;">A Secret Spontaneous Smile!</h4>
+                <p style="font-size: 14px; line-height: 1.7; color: #FFF7EC;">
+                  Surprise! Here is the secret moment captured right when the celebration started. You are the heart of this entire universe, Didi!
+                </p>
+                <button class="btn-luxury-gold" id="btn-trigger-fireworks" style="margin-top: 20px;">
+                  ✧ &nbsp; Launch Grand Royal Fireworks
+                </button>
+              </div>
+            `;
+          } else {
+            modalBody.innerHTML = data.content;
+          }
 
           // Wire special button in surprise if present
           const fwBtn = modalBody.querySelector('#btn-trigger-fireworks');
