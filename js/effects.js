@@ -317,12 +317,14 @@
     const rect = canvas.getBoundingClientRect();
     museumRenderer.setSize(rect.width || 800, rect.height || 600);
 
+    const isMobile = window.innerWidth <= 768;
+
     museumScene = new T.Scene();
     museumCamera = new T.PerspectiveCamera(45, (rect.width || 800) / (rect.height || 600), 0.1, 100);
-    museumCamera.position.set(0, 0.3, 8.6);
+    museumCamera.position.set(0, 0.25, isMobile ? 12.0 : 10.4);
 
     // Warm museum studio lighting
-    const amb = new T.AmbientLight(0xFFF7EC, 1.5);
+    const amb = new T.AmbientLight(0xFFF7EC, 1.6);
     museumScene.add(amb);
     const dir = new T.DirectionalLight(0xD8B779, 1.8);
     dir.position.set(4, 6, 7);
@@ -349,18 +351,22 @@
       : defaultProjectPhotos;
 
     const total = photos.length;
-    const radius = Math.max(5.2, total * 0.78);
+    // Generous radius ensures ample non-colliding spacing between adjacent photos
+    const radius = isMobile ? Math.max(5.8, total * 0.88) : Math.max(7.0, total * 1.02);
+    let carouselAngle = 0;
+    const anglePerItem = (Math.PI * 2) / total;
 
     photos.forEach((photo, idx) => {
-      const baseAngle = (idx / total) * Math.PI * 2;
+      const baseAngle = idx * anglePerItem;
 
       const frameGroup = new T.Group();
       frameGroup.position.set(Math.sin(baseAngle) * radius, 0, Math.cos(baseAngle) * radius);
       frameGroup.rotation.y = baseAngle;
 
       // Beveled Gold Frame Border
-      let initialW = 2.4, initialH = 2.8;
-      const frameGeo = new T.BoxGeometry(initialW + 0.22, initialH + 0.22, 0.08);
+      const targetH = isMobile ? 2.4 : 2.7;
+      let initialW = isMobile ? 2.0 : 2.3;
+      const frameGeo = new T.BoxGeometry(initialW + 0.22, targetH + 0.22, 0.08);
       const frameMat = new T.MeshStandardMaterial({
         color: 0xD8B779,
         metalness: 0.85,
@@ -372,7 +378,7 @@
       frameGroup.add(frameBorder);
 
       // Inner Photo Plane
-      const photoGeo = new T.PlaneGeometry(initialW, initialH);
+      const photoGeo = new T.PlaneGeometry(initialW, targetH);
       const photoMat = new T.MeshBasicMaterial({ color: 0xFFFFFF });
 
       textureLoader.load(photo.url, (tex) => {
@@ -380,15 +386,16 @@
         photoMat.map = tex;
         photoMat.needsUpdate = true;
 
-        // Preserve original image proportions and avoid any distortion
+        // Preserve original image proportions and avoid distortion, with safe width bounds
         if (tex.image && tex.image.width && tex.image.height) {
           const imgAspect = tex.image.width / tex.image.height;
-          const targetH = 2.8;
-          const targetW = targetH * imgAspect;
+          const maxW = isMobile ? 2.2 : 2.75;
+          const targetW = Math.min(Math.max(targetH * imgAspect, 1.8), maxW);
+          const actualH = targetW / imgAspect;
           photoMesh.geometry.dispose();
-          photoMesh.geometry = new T.PlaneGeometry(targetW, targetH);
+          photoMesh.geometry = new T.PlaneGeometry(targetW, actualH);
           frameBorder.geometry.dispose();
-          frameBorder.geometry = new T.BoxGeometry(targetW + 0.22, targetH + 0.22, 0.08);
+          frameBorder.geometry = new T.BoxGeometry(targetW + 0.22, actualH + 0.22, 0.08);
         }
       });
 
@@ -405,10 +412,10 @@
         group: frameGroup,
         data: photo,
         angle: baseAngle,
-        baseAngle: baseAngle,
+        baseIndex: idx,
         index: idx,
-        floatSpeed: 0.85 + (idx % 4) * 0.2,
-        floatPhase: idx * 1.2
+        floatSpeed: 0.85 + (idx % 3) * 0.2,
+        floatPhase: idx * 1.3
       });
     });
 
@@ -442,16 +449,16 @@
       if (!isDragging) return;
       const deltaX = (e.clientX - prevX) * 0.005;
       prevX = e.clientX;
-      museumFrames.forEach(f => { f.angle += deltaX; });
+      carouselAngle += deltaX;
     });
 
-    // Touch support
+    // Touch support for mobile
     let touchPrevX = 0;
     canvas.addEventListener('touchstart', (e) => { touchPrevX = e.touches[0].clientX; }, { passive: true });
     canvas.addEventListener('touchmove', (e) => {
       const deltaX = (e.touches[0].clientX - touchPrevX) * 0.006;
       touchPrevX = e.touches[0].clientX;
-      museumFrames.forEach(f => { f.angle += deltaX; });
+      carouselAngle += deltaX;
     }, { passive: true });
 
     let isMuseumFloating = true;
@@ -487,24 +494,26 @@
       }
 
       if (isMuseumFloating) {
-        museumFrames.forEach((f) => {
-          // Smooth foreground slow-down and background acceleration:
-          // Foreground: cos(angle) > 0 (near camera, Z > 0) -> slow down
-          // Background: cos(angle) < 0 (far from camera, Z < 0) -> accelerate fast
-          const bgFactor = (1 - Math.cos(f.angle)) * 0.5; // 0 in foreground center, 1 in background center
-          const orbitalSpeed = 0.0028 + Math.pow(bgFactor, 1.8) * 0.016;
+        // Nearest item offset to foreground center (angle 0)
+        const nearestOffset = ((carouselAngle % anglePerItem) + anglePerItem) % anglePerItem;
+        const normDistFromCenter = Math.abs(nearestOffset - anglePerItem / 2) / (anglePerItem / 2);
+        // Foreground center slow down to 0.0024, accelerate to 0.015 when in transit/background
+        const currentSpeed = 0.0024 + Math.pow(1 - normDistFromCenter, 1.6) * 0.013;
+        carouselAngle = (carouselAngle + currentSpeed) % (Math.PI * 2);
 
-          f.angle = (f.angle + orbitalSpeed) % (Math.PI * 2);
+        museumFrames.forEach((f, idx) => {
+          // Invariant angular spacing guarantees 0 overlap
+          f.angle = (carouselAngle + idx * anglePerItem) % (Math.PI * 2);
 
           // Position in 3D orbit
           f.group.position.x = Math.sin(f.angle) * radius;
           f.group.position.z = Math.cos(f.angle) * radius;
 
-          // Independent organic flying float wave and tilt
+          // Independent organic flying float wave on Y and gentle rocking tilt
           f.group.position.y = Math.sin(time * f.floatSpeed + f.floatPhase) * 0.22;
-          f.group.rotation.y = f.angle;
-          f.group.rotation.z = Math.sin(time * 0.9 + f.index) * 0.035;
-          f.group.rotation.x = Math.cos(time * 0.7 + f.index) * 0.025;
+          f.group.rotation.y = f.angle; // Facing outward along orbit / towards camera
+          f.group.rotation.z = Math.sin(time * 0.8 + idx) * 0.03;
+          f.group.rotation.x = Math.cos(time * 0.6 + idx) * 0.02;
         });
       }
 
@@ -530,6 +539,8 @@
     window.addEventListener('resize', () => {
       const r = canvas.getBoundingClientRect();
       if (!r.width) return;
+      const isMob = window.innerWidth <= 768;
+      museumCamera.position.z = isMob ? 12.0 : 10.4;
       museumCamera.aspect = r.width / r.height;
       museumCamera.updateProjectionMatrix();
       museumRenderer.setSize(r.width, r.height);
@@ -551,9 +562,10 @@
     updateMuseumFloatingUI();
     Birthday.toast?.("Photograph focused & locked static. Tap hint to resume 3D float! 📌");
 
-    // Center the selected frame smoothly in the front
     const total = museumFrames.length;
-    const radius = Math.max(5.2, total * 0.78);
+    const isMobile = window.innerWidth <= 768;
+    const radius = isMobile ? Math.max(5.8, total * 0.88) : Math.max(7.0, total * 1.02);
+    const anglePerItem = (Math.PI * 2) / total;
 
     if (window.gsap) {
       const targetAngle = 0;
@@ -617,8 +629,8 @@
      3. PREMIUM 3D BIRTHDAY CAKE WITH PROCEDURAL CANDLE FLAMES & SMOKE
      -------------------------------------------------------------------------- */
   let cakeScene, cakeCamera, cakeRenderer;
-  let cakeFlames = [], cakeGroup;
-  let isCakeLit = true;
+  let cakeFlames = [], cakeGroup, cakeKnifeGroup, cakeSliceGroup;
+  let isCakeLit = true, isCakeCut = false;
 
   function init3DCake() {
     const canvas = document.querySelector('#three-cake');
@@ -691,6 +703,53 @@
       cakeGroup.add(rose);
     }
 
+    // Ceremonial Cake Slice (Separate wedge that slides forward on cutting)
+    cakeSliceGroup = new T.Group();
+    const sliceTier1Mat = new T.MeshStandardMaterial({ color: 0xFFF7EC, roughness: 0.35, metalness: 0.05 });
+    const sliceTier1 = new T.Mesh(new T.CylinderGeometry(1.82, 1.82, 0.72, 16, 1, false, -0.28, 0.56), sliceTier1Mat);
+    sliceTier1.position.y = -0.05;
+    cakeSliceGroup.add(sliceTier1);
+
+    const sliceTier2Mat = new T.MeshStandardMaterial({ color: 0xD9A6B2, roughness: 0.45, metalness: 0.1 });
+    const sliceTier2 = new T.Mesh(new T.CylinderGeometry(1.22, 1.22, 0.62, 16, 1, false, -0.28, 0.56), sliceTier2Mat);
+    sliceTier2.position.y = 0.6;
+    cakeSliceGroup.add(sliceTier2);
+
+    const slicePlateMat = new T.MeshStandardMaterial({ color: 0xD8B779, metalness: 0.85, roughness: 0.2 });
+    const slicePlate = new T.Mesh(new T.CylinderGeometry(1.4, 1.2, 0.05, 24), slicePlateMat);
+    slicePlate.position.y = -0.42;
+    cakeSliceGroup.add(slicePlate);
+
+    const sliceRose = create3DFlower();
+    sliceRose.scale.setScalar(0.3);
+    sliceRose.position.set(0.65, 0.9, 0);
+    cakeSliceGroup.add(sliceRose);
+
+    cakeGroup.add(cakeSliceGroup);
+
+    // Ceremonial 3D Cake Knife
+    cakeKnifeGroup = new T.Group();
+    const bladeMat = new T.MeshStandardMaterial({ color: 0xEAE2D5, metalness: 0.95, roughness: 0.1 });
+    const blade = new T.Mesh(new T.BoxGeometry(0.06, 0.38, 1.5), bladeMat);
+    blade.position.z = 0.75;
+    cakeKnifeGroup.add(blade);
+
+    const handleMat = new T.MeshStandardMaterial({ color: 0xD8B779, metalness: 0.9, roughness: 0.2 });
+    const handle = new T.Mesh(new T.CylinderGeometry(0.08, 0.1, 0.8, 16), handleMat);
+    handle.rotation.x = Math.PI / 2;
+    handle.position.z = -0.4;
+    cakeKnifeGroup.add(handle);
+
+    const pommelMat = new T.MeshStandardMaterial({ color: 0xC82A45, roughness: 0.2, metalness: 0.6 });
+    const pommel = new T.Mesh(new T.SphereGeometry(0.1, 12, 12), pommelMat);
+    pommel.position.z = -0.85;
+    cakeKnifeGroup.add(pommel);
+
+    cakeKnifeGroup.position.set(0.4, 3.2, 0.8);
+    cakeKnifeGroup.rotation.set(-0.35, 0.35, -0.2);
+    cakeKnifeGroup.visible = false;
+    cakeScene.add(cakeKnifeGroup);
+
     // Birthday Candles & Animated Procedural Flames
     const candleMat = new T.MeshStandardMaterial({ color: 0xFFF7EC, roughness: 0.2 });
     const candlePositions = [
@@ -755,6 +814,78 @@
       cakeRenderer.setSize(r.width, r.height);
     });
   }
+
+  fx.cutCake = () => {
+    if (!cakeKnifeGroup || !cakeSliceGroup) return;
+
+    // Reset slice position if cutting again
+    if (isCakeCut) {
+      if (window.gsap) {
+        gsap.to(cakeSliceGroup.position, { x: 0, y: 0, z: 0, duration: 0.4 });
+      } else {
+        cakeSliceGroup.position.set(0, 0, 0);
+      }
+    }
+    isCakeCut = true;
+
+    // Reveal knife
+    cakeKnifeGroup.visible = true;
+    cakeKnifeGroup.position.set(0.4, 3.2, 0.8);
+    cakeKnifeGroup.scale.set(1, 1, 1);
+    cakeKnifeGroup.rotation.set(-0.35, 0.35, -0.2);
+
+    if (window.gsap) {
+      gsap.timeline()
+        // 1. Knife moves smoothly down toward cake and performs the cut
+        .to(cakeKnifeGroup.position, {
+          x: 0.2,
+          y: 0.65,
+          z: 0.45,
+          duration: 0.85,
+          ease: 'power2.inOut'
+        })
+        .to(cakeKnifeGroup.rotation, {
+          x: 0.08,
+          z: 0.2,
+          duration: 0.35,
+          ease: 'power1.inOut'
+        })
+        .call(() => {
+          fx.blowOutCandles();
+          Birthday.soundFx?.playWishChime?.();
+        })
+        // 2. Knife lifts and glides away
+        .to(cakeKnifeGroup.position, {
+          y: 3.0,
+          x: 1.8,
+          duration: 0.65,
+          ease: 'power2.out'
+        })
+        .to(cakeKnifeGroup.scale, {
+          x: 0, y: 0, z: 0,
+          duration: 0.3
+        })
+        // 3. Cake separates into two slices with smooth animation (slice slides forward)
+        .to(cakeSliceGroup.position, {
+          x: 0.38,
+          z: 1.35,
+          y: 0.06,
+          duration: 1.0,
+          ease: 'back.out(1.4)'
+        }, "-=0.45")
+        .call(() => {
+          // Trigger confetti, sparkles, and a joyful birthday celebration
+          fx.launchConfetti(95);
+          // Play a birthday celebration sound or song
+          Birthday.music?.playHappyBirthdaySong?.();
+        });
+    } else {
+      fx.blowOutCandles();
+      cakeSliceGroup.position.set(0.38, 0.06, 1.35);
+      fx.launchConfetti(95);
+      Birthday.music?.playHappyBirthdaySong?.();
+    }
+  };
 
   fx.blowOutCandles = () => {
     isCakeLit = false;
