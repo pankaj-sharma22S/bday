@@ -71,6 +71,7 @@
       <ul class="nav-links">
         <li><a href="#home">Universe</a></li>
         <li><a href="#museum">3D Museum</a></li>
+        <li><a href="#floating-stream">Floating</a></li>
         <li><a href="#memories">Editorial Gallery</a></li>
         <li><a href="#cake">The Cake</a></li>
         <li><a href="#doll">Guardian</a></li>
@@ -193,6 +194,23 @@
           <div class="museum-active-card show" id="museum-active-card">
             <h4 id="museum-card-title">A Blossom in the Sunlight</h4>
             <p id="museum-card-desc">Radiant, timeless, and smiling with the roses. A moment capturing your natural warmth.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 3.5. FLOATING CELESTIAL PHOTOGRAPHS STREAM -->
+    <section class="floating-stream-section" id="floating-stream">
+      <div class="floating-stream-container">
+        <div class="eyebrow">✦ &nbsp; WEIGHTLESS MEMORIES &nbsp; ✦</div>
+        <h2 class="section-title">Memories Floating In <em>Starlight</em></h2>
+        <p class="section-desc" style="margin-bottom: 30px;">
+          Drifting like golden polaroids through space. Swipe horizontally or tap any floating memory to pull it into view!
+        </p>
+
+        <div class="floating-polaroids-canvas">
+          <div class="floating-polaroids-track" id="floating-polaroids-track">
+            <!-- Populated dynamically by js/gallery.js -->
           </div>
         </div>
       </div>
@@ -637,6 +655,34 @@
 
   <!-- Toast Notification Bar -->
   <div class="toast-notice" id="toast-notice" role="status"></div>
+
+  <!-- Mobile Bottom Ergonomic Navigation Dock (Phones & Tablets) -->
+  <nav class="mobile-bottom-dock" aria-label="Mobile Navigation">
+    <a href="#home" class="dock-item active">
+      <span class="dock-icon">✦</span>
+      <span>Universe</span>
+    </a>
+    <a href="#museum" class="dock-item">
+      <span class="dock-icon">🏛️</span>
+      <span>3D Gallery</span>
+    </a>
+    <a href="#floating-stream" class="dock-item">
+      <span class="dock-icon">✨</span>
+      <span>Floating</span>
+    </a>
+    <a href="#memories" class="dock-item">
+      <span class="dock-icon">📸</span>
+      <span>Photos</span>
+    </a>
+    <a href="#cake" class="dock-item">
+      <span class="dock-icon">🎂</span>
+      <span>Cake</span>
+    </a>
+    <a href="#letter" class="dock-item">
+      <span class="dock-icon">💌</span>
+      <span>Letter</span>
+    </a>
+  </nav>
 
 </body>
 </html>

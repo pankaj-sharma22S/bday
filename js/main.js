@@ -297,3 +297,50 @@
     });
   });
 })();
+
+
+    // 13. Mobile Touch Sparkle Trail
+    let lastSparkleTime = 0;
+    window.addEventListener('touchmove', (e) => {
+      const now = performance.now();
+      if (now - lastSparkleTime < 70) return; // throttle for 60fps performance
+      lastSparkleTime = now;
+
+      const touch = e.touches[0];
+      if (!touch) return;
+
+      const sparkle = document.createElement('div');
+      sparkle.className = 'touch-sparkle';
+      sparkle.style.left = touch.clientX + 'px';
+      sparkle.style.top = touch.clientY + 'px';
+
+      const symbols = ['✦', '✧', '❊', '✨', '♥'];
+      sparkle.textContent = symbols[Math.floor(Math.random() * symbols.length)];
+      sparkle.style.color = (Math.random() > 0.5) ? '#D8B779' : '#D9A6B2';
+      sparkle.style.fontSize = (12 + Math.random() * 8) + 'px';
+
+      document.body.appendChild(sparkle);
+      setTimeout(() => sparkle.remove(), 800);
+    }, { passive: true });
+
+    // 14. Mobile Bottom Dock Active Section Tracking
+    const dockItems = document.querySelectorAll('.dock-item');
+    const trackedSections = document.querySelectorAll('section[id]');
+
+    window.addEventListener('scroll', () => {
+      const scrollPos = window.scrollY + 200;
+      trackedSections.forEach(sec => {
+        const top = sec.offsetTop;
+        const height = sec.offsetHeight;
+        const id = sec.getAttribute('id');
+        if (scrollPos >= top && scrollPos < top + height) {
+          dockItems.forEach(item => {
+            if (item.getAttribute('href') === '#' + id) {
+              item.classList.add('active');
+            } else {
+              item.classList.remove('active');
+            }
+          });
+        }
+      });
+    }, { passive: true });

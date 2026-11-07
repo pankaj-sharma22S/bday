@@ -126,6 +126,47 @@
       });
     }
 
+    // 3D Floating Celestial Photograph Planes in Background Universe
+    const texLoader = new T.TextureLoader();
+    const floatingImages = [
+      'assets/images/garden-rose.jpg',
+      'assets/images/temple-steps.jpg',
+      'assets/images/couture-grace.jpg',
+      'assets/images/himachali-heritage.jpg',
+      'assets/images/family-harmony.jpg',
+      'assets/images/royal-celebration.jpg'
+    ];
+    const universeFloatingPhotos = [];
+    floatingImages.forEach((imgSrc) => {
+      const frameGroup = new T.Group();
+      const goldBorderMat = new T.MeshBasicMaterial({ color: 0xD8B779 });
+      const border = new T.Mesh(new T.PlaneGeometry(1.65, 2.15), goldBorderMat);
+      frameGroup.add(border);
+
+      const pMat = new T.MeshBasicMaterial({ transparent: true, opacity: 0.82, side: T.DoubleSide });
+      texLoader.load(imgSrc, (tex) => {
+        pMat.map = tex;
+        pMat.needsUpdate = true;
+      });
+      const pMesh = new T.Mesh(new T.PlaneGeometry(1.5, 2.0), pMat);
+      pMesh.position.z = 0.02;
+      frameGroup.add(pMesh);
+
+      const px = (Math.random() - 0.5) * 22;
+      const py = (Math.random() - 0.5) * 16;
+      const pz = -2 - Math.random() * 8;
+      frameGroup.position.set(px, py, pz);
+      frameGroup.rotation.z = (Math.random() - 0.5) * 0.4;
+
+      universeScene.add(frameGroup);
+      universeFloatingPhotos.push({
+        group: frameGroup,
+        speedY: 0.008 + Math.random() * 0.012,
+        rotSpeed: 0.003 + Math.random() * 0.004,
+        phase: Math.random() * Math.PI * 2
+      });
+    });
+
     // Parallax on Pointer Move
     let mouseX = 0, mouseY = 0;
     window.addEventListener('pointermove', (e) => {
@@ -169,6 +210,17 @@
         if (p.mesh.position.y < -10) {
           p.mesh.position.y = 12;
           p.mesh.position.x = (Math.random() - 0.5) * 20;
+        }
+      });
+
+      universeFloatingPhotos.forEach(p => {
+        p.group.position.y += p.speedY;
+        p.group.position.x += Math.sin(t * 0.4 + p.phase) * 0.005;
+        p.group.rotation.y = Math.sin(t * 0.3 + p.phase) * 0.2;
+        p.group.rotation.z += p.rotSpeed * 0.4;
+        if (p.group.position.y > 14) {
+          p.group.position.y = -14;
+          p.group.position.x = (Math.random() - 0.5) * 22;
         }
       });
 

@@ -96,3 +96,59 @@
 .floating-mid {
   animation: floatSoft 4.5s ease-in-out infinite alternate;
 }
+
+
+/* Floating polaroids animation */
+@keyframes floatPolaroid1 {
+  0%, 100% {
+    transform: translateY(0px) rotate(-3deg);
+  }
+  50% {
+    transform: translateY(-18px) rotate(2deg);
+  }
+}
+@keyframes floatPolaroid2 {
+  0%, 100% {
+    transform: translateY(0px) rotate(4deg);
+  }
+  50% {
+    transform: translateY(-22px) rotate(-1deg);
+  }
+}
+@keyframes floatPolaroid3 {
+  0%, 100% {
+    transform: translateY(0px) rotate(-2deg);
+  }
+  50% {
+    transform: translateY(-15px) rotate(3deg);
+  }
+}
+
+.float-pol-1 { animation: floatPolaroid1 6.5s ease-in-out infinite; }
+.float-pol-2 { animation: floatPolaroid2 8s ease-in-out infinite 1s; }
+.float-pol-3 { animation: floatPolaroid3 7s ease-in-out infinite 0.5s; }
+
+/* Mobile Touch Sparkle */
+.touch-sparkle {
+  position: fixed;
+  width: 14px;
+  height: 14px;
+  pointer-events: none;
+  z-index: 99999;
+  transform: translate(-50%, -50%) scale(1);
+  animation: sparklePop 0.8s ease-out forwards;
+}
+@keyframes sparklePop {
+  0% {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(0.4) rotate(0deg);
+  }
+  50% {
+    opacity: 0.9;
+    transform: translate(-50%, -50%) scale(1.3) rotate(90deg);
+  }
+  100% {
+    opacity: 0;
+    transform: translate(-50%, -50%) scale(0.2) translateY(-25px) rotate(180deg);
+  }
+}

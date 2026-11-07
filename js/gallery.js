@@ -1,9 +1,9 @@
 /* ==========================================================================
-   EDITORIAL PHOTO GALLERY & POETRY SPOTLIGHT ENGINE
-   - Curated Photographs with Thematic Poems & Expressions of Gratitude
-   - Champagne-Gold Spotlight for Didi
-   - Original vs Cinematic Grade Toggle
-   - Lightbox with Full Poem, Gratitude Note, and Spotlight Tweak
+   EDITORIAL PHOTO GALLERY & 3D FLIPPABLE MEMORY EXPERIENCE
+   - 3D Flippable Memory Cards (Photo on front, Dedicated Poem & Gratitude on back)
+   - Interactive Touch Swipe Navigation for Mobile Lightbox
+   - Floating Polaroids Stream
+   - Spotlight with Custom Repositioning
    ========================================================================== */
 
 (() => {
@@ -15,7 +15,7 @@
       id: 'photo-1',
       url: 'assets/images/garden-rose.jpg',
       title: 'A Blossom in the Sunlight',
-      subtitle: 'Theme: Natural Grace & Springtime',
+      subtitle: 'Natural Grace & Springtime',
       caption: 'Radiant, timeless, and smiling with the roses. A moment capturing your natural warmth.',
       poem: `In a garden of a thousand blooms,
 You are the gentlest rose that grows.
@@ -34,7 +34,7 @@ More precious than the earth can hold.`,
       id: 'photo-2',
       url: 'assets/images/temple-steps.jpg',
       title: 'Serenity & Quiet Wisdom',
-      subtitle: 'Theme: Peace, Strength & Spiritual Grace',
+      subtitle: 'Peace, Strength & Guidance',
       caption: 'Elegance in quiet contemplation on carved wooden steps. Pure peace and sophistication.',
       poem: `Like quiet dawn on temple stone,
 You walk with grace that stands alone.
@@ -53,7 +53,7 @@ The strongest tree upon our land.`,
       id: 'photo-3',
       url: 'assets/images/couture-grace.jpg',
       title: 'Starlight & Royal Couture',
-      subtitle: 'Theme: Glamour, Ambition & Radiance',
+      subtitle: 'Glamour, Ambition & Radiance',
       caption: 'An evening of royalty, shimmering couture, and diamond grace.',
       poem: `A queen who wears no boastful crown,
 Yet outshines all across the town.
@@ -72,7 +72,7 @@ No star can match the light in you.`,
       id: 'photo-4',
       url: 'assets/images/himachali-heritage.jpg',
       title: 'Tradition, Laughter & Roots',
-      subtitle: 'Theme: Heritage, Sibling Bond & Shared Smiles',
+      subtitle: 'Heritage & Sibling Bond',
       caption: 'Traditional Himachali elegance, celebrating culture, sibling laughter, and heritage.',
       poem: `From childhood laughs to silly fights,
 To whispered jokes on festive nights.
@@ -92,7 +92,7 @@ Beside you is where I belong.`,
       id: 'photo-5',
       url: 'assets/images/family-harmony.jpg',
       title: 'Roots & Unbreakable Love',
-      subtitle: 'Theme: Family, Protection & Pillars of Life',
+      subtitle: 'Family Protection & Pillars',
       caption: 'Surrounded by loving family under the shade of trees. Where blessings always protect you.',
       poem: `Under the branches wide and green,
 The purest love the world has seen.
@@ -112,7 +112,7 @@ Whose gentle presence dries each tear.`,
       id: 'photo-6',
       url: 'assets/images/mom-and-didi.jpg',
       title: 'Mother’s Sweetest Blessing',
-      subtitle: 'Theme: Motherly Tenderness & Sweet Memories',
+      subtitle: 'Motherly Tenderness & Sweetness',
       caption: 'Birthday tiara, pure sweetness, and the unconditional warmth of Mom’s love.',
       poem: `A mother's smile, a daughter's grace,
 Two tender souls in one embrace.
@@ -132,7 +132,7 @@ Upon this sister heart of mine.`,
       id: 'photo-7',
       url: 'assets/images/royal-celebration.jpg',
       title: 'The Queen of Our Universe',
-      subtitle: 'Theme: Adoration, Forever Bond & Celebration',
+      subtitle: 'Adoration & Lifelong Promise',
       caption: 'Grand celebration under crystal chandeliers. The center of everyone’s adoration.',
       poem: `The chandeliers may sparkle bright,
 Yet you remain the only light.
@@ -157,6 +157,7 @@ And let our lifelong bond unfold.`,
   const grid = document.querySelector('#editorial-grid');
   const countEl = document.querySelector('#gallery-count');
   const filterBtns = document.querySelectorAll('.filter-btn');
+  const polaroidsTrack = document.querySelector('#floating-polaroids-track');
 
   // Lightbox elements
   const lightbox = document.querySelector('#lightbox');
@@ -181,54 +182,100 @@ And let our lifelong bond unfold.`,
 
     if (countEl) countEl.textContent = `${filtered.length} CURATED MEMORIES & POEMS`;
 
+    // 1. Render 3D Flippable Editorial Cards
     grid.innerHTML = filtered.map((photo) => {
       const isQueen = photo.group && photo.spotlight;
       const enhancedClass = photo.enhanced ? 'cinematic-enhanced' : '';
 
       return `
         <article class="editorial-card ${photo.layoutClass || 'editorial-medium'}" data-id="${photo.id}">
-          <div class="photo-visual-frame" data-open="${photo.id}">
-            <img src="${photo.url}" alt="${photo.title}" class="${enhancedClass}" loading="lazy">
+          <div class="card-inner-3d">
             
-            ${isQueen ? `
-              <div class="spotlight-wrapper" style="left: ${photo.spotlight.x}%; top: ${photo.spotlight.y}%;">
-                <div class="spotlight-halo"></div>
-                <div class="spotlight-tag">THE BIRTHDAY GIRL ♕</div>
+            <!-- FRONT: High Fashion Photo -->
+            <div class="card-front">
+              <div class="photo-visual-frame" data-open="${photo.id}">
+                <img src="${photo.url}" alt="${photo.title}" class="${enhancedClass}" loading="lazy">
+                
+                ${isQueen ? `
+                  <div class="spotlight-wrapper" style="left: ${photo.spotlight.x}%; top: ${photo.spotlight.y}%;">
+                    <div class="spotlight-halo"></div>
+                    <div class="spotlight-tag">THE BIRTHDAY GIRL ♕</div>
+                  </div>
+                ` : ''}
+
+                <div class="card-poetry-badge">
+                  <span>✦ Tap to Flip & Read Poem</span>
+                </div>
               </div>
-            ` : ''}
 
-            <!-- Floating Poetry Snippet on Hover -->
-            <div class="card-poetry-badge">
-              <span>✦ Read Poem & Wish</span>
+              <div class="editorial-meta">
+                <div class="editorial-info">
+                  <span class="photo-theme-tag">${photo.subtitle || 'MEMORIES WITH DIDI'}</span>
+                  <h3>${photo.title}</h3>
+                  <p>${photo.caption}</p>
+                </div>
+                <div class="editorial-actions">
+                  <button class="btn-photo-action btn-flip" data-flip="${photo.id}">
+                    🔄 Flip
+                  </button>
+                  <button class="btn-photo-action toggle-grade" data-toggle="${photo.id}">
+                    ${photo.enhanced ? 'Cinematic' : 'Original'}
+                  </button>
+                  <button class="btn-photo-action open-expand" data-open="${photo.id}">
+                    Enlarge
+                  </button>
+                </div>
+              </div>
             </div>
-          </div>
 
-          <div class="editorial-meta">
-            <div class="editorial-info">
-              <span class="photo-theme-tag">${photo.subtitle || 'MEMORIES WITH DIDI'}</span>
-              <h3>${photo.title}</h3>
-              <p>${photo.caption}</p>
+            <!-- BACK: Dedicated Poem & Gratitude -->
+            <div class="card-back">
+              <div>
+                <span class="photo-theme-tag">DEDICATED TO DIDI</span>
+                <h3 style="font-family: var(--font-serif); font-size: 20px; color: var(--champagne-gold); margin-bottom: 12px;">${photo.title}</h3>
+                <div class="card-back-poem">
+                  ${(photo.poem || "").replace(/\n/g, '<br>')}
+                </div>
+                <div class="card-back-gratitude">
+                  ${photo.gratitude || ""}
+                </div>
+                <div class="card-back-wish">
+                  ${photo.wish || ""}
+                </div>
+              </div>
+              <div class="card-back-actions">
+                <button class="btn-photo-action btn-unflip" data-flip="${photo.id}">
+                  ↩ Return to Photo
+                </button>
+                <button class="btn-photo-action open-expand" data-open="${photo.id}">
+                  🔍 Full Screen View
+                </button>
+              </div>
             </div>
-            <div class="editorial-actions">
-              <button class="btn-photo-action toggle-grade" data-toggle="${photo.id}">
-                ${photo.enhanced ? 'Cinematic' : 'Original'}
-              </button>
-              <button class="btn-photo-action open-expand" data-open="${photo.id}">
-                Poem & Full View
-              </button>
-            </div>
+
           </div>
         </article>
       `;
     }).join('');
 
-    // Attach Click Events
+    // Attach Card Flip Interactions
+    grid.querySelectorAll('.btn-flip, .btn-unflip').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const card = btn.closest('.editorial-card');
+        card?.classList.toggle('flipped');
+        Birthday.soundFx?.playGiftChime();
+      });
+    });
+
+    // Double tap / Click photo frame opens lightbox
     grid.querySelectorAll('[data-open]').forEach(el => {
       el.addEventListener('click', () => {
         openLightboxById(el.dataset.open);
       });
     });
 
+    // Toggle Cinematic Grade
     grid.querySelectorAll('.toggle-grade').forEach(btn => {
       btn.addEventListener('click', (e) => {
         e.stopPropagation();
@@ -241,6 +288,29 @@ And let our lifelong bond unfold.`,
         }
       });
     });
+
+    // 2. Render Floating Polaroids Stream
+    if (polaroidsTrack) {
+      polaroidsTrack.innerHTML = Birthday.galleryPhotos.map((photo, i) => {
+        const floatClass = (i % 3 === 0) ? 'float-pol-1' : (i % 3 === 1) ? 'float-pol-2' : 'float-pol-3';
+        return `
+          <div class="floating-polaroid-card ${floatClass}" data-open="${photo.id}">
+            <div class="washi-tape"></div>
+            <div class="polaroid-img-wrap">
+              <img src="${photo.url}" alt="${photo.title}" loading="lazy">
+            </div>
+            <div class="polaroid-caption">${photo.title}</div>
+          </div>
+        `;
+      }).join('');
+
+      polaroidsTrack.querySelectorAll('[data-open]').forEach(card => {
+        card.addEventListener('click', () => {
+          Birthday.effects?.launchConfetti(25);
+          openLightboxById(card.dataset.open);
+        });
+      });
+    }
   }
 
   // Filter Handling
@@ -282,14 +352,14 @@ And let our lifelong bond unfold.`,
     }
 
     if (photo.group && photo.spotlight) {
-      if (lightboxTip) lightboxTip.textContent = "The Birthday Girl is spotlit with champagne gold. Tap anywhere to reposition.";
+      if (lightboxTip) lightboxTip.textContent = "The Birthday Girl is spotlit with champagne gold. Tap anywhere on photo to reposition.";
       if (lightboxSpotlight) {
         lightboxSpotlight.style.display = 'flex';
         lightboxSpotlight.style.left = photo.spotlight.x + '%';
         lightboxSpotlight.style.top = photo.spotlight.y + '%';
       }
     } else {
-      if (lightboxTip) lightboxTip.textContent = "Luxury editorial presentation — high fashion resolution.";
+      if (lightboxTip) lightboxTip.textContent = "Swipe left / right to browse memories. Swipe down to close.";
       if (lightboxSpotlight) lightboxSpotlight.style.display = 'none';
     }
 
@@ -297,6 +367,36 @@ And let our lifelong bond unfold.`,
     if (window.gsap) {
       gsap.fromTo('.lightbox-content-box', { scale: 0.94, opacity: 0 }, { scale: 1, opacity: 1, duration: 0.4, ease: 'power2.out' });
     }
+  }
+
+  // Touch Swipe Gestures for Mobile Lightbox (Left = Next, Right = Prev, Down = Close)
+  let touchStartX = 0, touchStartY = 0;
+  if (lightbox) {
+    lightbox.addEventListener('touchstart', (e) => {
+      touchStartX = e.changedTouches[0].screenX;
+      touchStartY = e.changedTouches[0].screenY;
+    }, { passive: true });
+
+    lightbox.addEventListener('touchend', (e) => {
+      const touchEndX = e.changedTouches[0].screenX;
+      const touchEndY = e.changedTouches[0].screenY;
+      const deltaX = touchEndX - touchStartX;
+      const deltaY = touchEndY - touchStartY;
+
+      if (Math.abs(deltaX) > 45 && Math.abs(deltaX) > Math.abs(deltaY)) {
+        const len = Birthday.galleryPhotos.length;
+        if (deltaX < 0) {
+          // Swipe Left -> Next photo
+          openLightbox((Birthday.currentLightboxIndex + 1) % len);
+        } else {
+          // Swipe Right -> Prev photo
+          openLightbox((Birthday.currentLightboxIndex - 1 + len) % len);
+        }
+      } else if (deltaY > 80 && Math.abs(deltaY) > Math.abs(deltaX)) {
+        // Swipe Down -> Close lightbox
+        lightbox.classList.remove('open');
+      }
+    }, { passive: true });
   }
 
   // Manual Spotlight Repositioning on Click
@@ -320,7 +420,7 @@ And let our lifelong bond unfold.`,
     });
   }
 
-  // Navigation
+  // Navigation Buttons
   const prevBtn = document.querySelector('#lightbox-prev');
   const nextBtn = document.querySelector('#lightbox-next');
   const closeBtn = document.querySelector('#lightbox-close');
@@ -353,37 +453,6 @@ And let our lifelong bond unfold.`,
   if (lightbox) {
     lightbox.addEventListener('click', (e) => {
       if (e.target === lightbox) lightbox.classList.remove('open');
-    });
-  }
-
-  // Live Photo Upload Handling
-  const photoInput = document.querySelector('#photo-input');
-  if (photoInput) {
-    photoInput.addEventListener('change', (e) => {
-      const files = e.target.files;
-      if (!files || !files.length) return;
-
-      Array.from(files).forEach((file, i) => {
-        const url = URL.createObjectURL(file);
-        const newPhoto = {
-          id: 'user-photo-' + Date.now() + '-' + i,
-          url: url,
-          title: file.name.replace(/\.[^/.]+$/, "").replace(/[-_]/g, " "),
-          subtitle: 'Cherished Family Moment',
-          caption: "A newly added cherished memory with Didi.",
-          poem: `Another moment in our story,\nBathed in love and golden glory.\nWith every picture we can see,\nHow much your guidance means to me.`,
-          gratitude: `“Thank you for every moment you share with me.”`,
-          wish: `“May your future be filled with eternal joy and blessings.”`,
-          group: false,
-          category: 'individual',
-          layoutClass: 'editorial-portrait',
-          enhanced: true
-        };
-        Birthday.galleryPhotos.unshift(newPhoto);
-      });
-
-      renderGallery();
-      Birthday.toast?.(`${files.length} new photograph(s) welcomed into Didi's world! ✨`);
     });
   }
 
